@@ -1192,6 +1192,15 @@ fn create_t0()
     println!("create: {}",create(&var!(s("Hello world"))).unwrap());
     println!("create: {}",create(&var!([i(1),i(2),i(3),[i(1),i(2),i(3)]])).unwrap());
     println!("create: {}",create(&var!({s("one"):i(1),s("two"):i(2),s("three"):i(3)})).unwrap());
+
+    assert_eq!(create(&var!(blank)).unwrap(),"null");
+    assert_eq!(create(&var!(false)).unwrap(),"false");
+    assert_eq!(create(&var!(true)).unwrap(),"true");
+    assert_eq!(create(&var!(i(123))).unwrap(),"123");
+    assert_eq!(create(&var!(f(12.345))).unwrap(),"12.345");
+    assert_eq!(create(&var!(s("Hello world"))).unwrap(),"\"Hello world\"");
+    assert_eq!(create(&var!([i(1),i(2),i(3),[i(1),i(2),i(3)]])).unwrap(),"[1,2,3,[1,2,3]]");
+    assert_eq!(create(&var!({s("one"):i(1),s("two"):i(2),s("three"):i(3)})).unwrap(),"{\"one\":1,\"three\":3,\"two\":2}");
 }//}}}
 
 #[test]
@@ -1204,6 +1213,8 @@ fn create_t1()
 fn create_t2()
 {//{{{
     println!("create: {}",create(&var!(s("Hello\tworld\n"))).unwrap());
+
+    assert_eq!(create(&var!(s("Hello\tworld\n"))).unwrap(),"\"Hello\\tworld\\n\"");
 }//}}}
 
 #[test]
@@ -1219,6 +1230,19 @@ fn create_nice_t0()
     println!("create nice: {}",create_nice(&var!([i(1),i(2),i(3),[i(1),i(2),i(3)]]),tab_str).unwrap());
     println!("create nice: {}",create_nice(&var!({s("one"):i(1),s("two"):i(2),s("three"):i(3)}),tab_str).unwrap());
 
+    assert_eq!(create_nice(&var!(blank),tab_str).unwrap(),"null");
+    assert_eq!(create_nice(&var!(false),tab_str).unwrap(),"false");
+    assert_eq!(create_nice(&var!(true),tab_str).unwrap(),"true");
+    assert_eq!(create_nice(&var!(i(123)),tab_str).unwrap(),"123");
+    assert_eq!(create_nice(&var!(f(12.345)),tab_str).unwrap(),"12.345");
+    assert_eq!(create_nice(&var!(s("Hello world")),tab_str).unwrap(),"\"Hello world\"");
+
+    assert_eq!(create_nice(&var!([i(1),i(2),i(3),[i(1),i(2),i(3)]]),tab_str).unwrap(),
+            format!("[\n{0}1,\n{0}2,\n{0}3,\n{0}[\n{0}{0}1,\n{0}{0}2,\n{0}{0}3\n{0}]\n]",tab_str));
+
+    assert_eq!(create_nice(&var!({s("one"):i(1),s("two"):i(2),s("three"):i(3)}),tab_str).unwrap(),
+            format!("{{\n{0}\"one\":1,\n{0}\"three\":3,\n{0}\"two\":2\n}}",tab_str));
+
     println!("create nice: {}",create_nice(&var!(
 {
     s("one"):i(1),
@@ -1228,6 +1252,29 @@ fn create_nice_t0()
     s("object"):{s("one"):i(1),s("two"):i(2),s("three"):i(3)},
 }),tab_str).unwrap());
 
+    assert_eq!(create_nice(&var!(
+{
+    s("one"):i(1),
+    s("two"):i(2),
+    s("three"):i(3),
+    s("array"):[i(1),i(2),i(3)],
+    s("object"):{s("one"):i(1),s("two"):i(2),s("three"):i(3)},
+}),tab_str).unwrap(),
+format!("{{
+{0}\"array\":[
+{0}{0}1,
+{0}{0}2,
+{0}{0}3
+{0}],
+{0}\"object\":{{
+{0}{0}\"one\":1,
+{0}{0}\"three\":3,
+{0}{0}\"two\":2
+{0}}},
+{0}\"one\":1,
+{0}\"three\":3,
+{0}\"two\":2
+}}",tab_str));
 }//}}}
 
 }
