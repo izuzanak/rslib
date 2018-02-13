@@ -1,7 +1,6 @@
 [package]
-name = "var"
+name = "err"
 version = "0.1.0"
 authors = ["Jiří Zuzaňák <zuzanakjiri@gmail.com>"]
 
 [dependencies]
-err = { path = "../err" }

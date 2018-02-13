@@ -1,3 +1,4 @@
+#[macro_use] extern crate err;
 
 static ERROR_INVALID_VALUE_TYPE:&str = "Invalid value type";
 
@@ -107,7 +108,7 @@ impl Var {
             &(*self.loc).data
         }
     }
-    pub fn to_bool(&self) -> Result<bool,&'static str>
+    pub fn to_bool(&self) -> Result<bool,err::Error>
     {//{{{
         unsafe {
             match &mut (*self.loc).data {
@@ -117,11 +118,11 @@ impl Var {
                 &mut Data::Float(_)  |
                 &mut Data::String(_) |
                 &mut Data::Array(_)  |
-                &mut Data::Dict(_)   => Err(ERROR_INVALID_VALUE_TYPE)
+                &mut Data::Dict(_)   => err!(ERROR_INVALID_VALUE_TYPE)
             }
         }
     }//}}}
-    pub fn to_int(&self) -> Result<i64,&'static str>
+    pub fn to_int(&self) -> Result<i64,err::Error>
     {//{{{
         unsafe {
             match &mut (*self.loc).data {
@@ -131,11 +132,11 @@ impl Var {
                 &mut Data::Float(_)  |
                 &mut Data::String(_) |
                 &mut Data::Array(_)  |
-                &mut Data::Dict(_)   => Err(ERROR_INVALID_VALUE_TYPE)
+                &mut Data::Dict(_)   => err!(ERROR_INVALID_VALUE_TYPE)
             }
         }
     }//}}}
-    pub fn to_float(&self) -> Result<f64,&'static str>
+    pub fn to_float(&self) -> Result<f64,err::Error>
     {//{{{
         unsafe {
             match &mut (*self.loc).data {
@@ -145,11 +146,11 @@ impl Var {
                 &mut Data::Int(_)    |
                 &mut Data::String(_) |
                 &mut Data::Array(_)  |
-                &mut Data::Dict(_)   => Err(ERROR_INVALID_VALUE_TYPE)
+                &mut Data::Dict(_)   => err!(ERROR_INVALID_VALUE_TYPE)
             }
         }
     }//}}}
-    pub fn to_str(&self) -> Result<&String,&'static str>
+    pub fn to_str(&self) -> Result<&String,err::Error>
     {//{{{
         unsafe {
             match &mut (*self.loc).data {
@@ -159,11 +160,11 @@ impl Var {
                 &mut Data::Int(_)    |
                 &mut Data::Float(_)  |
                 &mut Data::Array(_)  |
-                &mut Data::Dict(_)   => Err(ERROR_INVALID_VALUE_TYPE)
+                &mut Data::Dict(_)   => err!(ERROR_INVALID_VALUE_TYPE)
             }
         }
     }//}}}
-    pub fn to_array(&self) -> Result<&mut Vec<Var>,&'static str>
+    pub fn to_array(&self) -> Result<&mut Vec<Var>,err::Error>
     {//{{{
         unsafe {
             match &mut (*self.loc).data {
@@ -173,11 +174,11 @@ impl Var {
                 &mut Data::Int(_)    |
                 &mut Data::Float(_)  |
                 &mut Data::String(_) |
-                &mut Data::Dict(_)   => Err(ERROR_INVALID_VALUE_TYPE)
+                &mut Data::Dict(_)   => err!(ERROR_INVALID_VALUE_TYPE)
             }
         }
     }//}}}
-    pub fn to_dict(&self) -> Result<&mut std::collections::BTreeMap<Var,Var>,&'static str>
+    pub fn to_dict(&self) -> Result<&mut std::collections::BTreeMap<Var,Var>,err::Error>
     {//{{{
         unsafe {
             match &mut (*self.loc).data {
@@ -187,7 +188,7 @@ impl Var {
                 &mut Data::Int(_)    |
                 &mut Data::Float(_)  |
                 &mut Data::String(_) |
-                &mut Data::Array(_)  => Err(ERROR_INVALID_VALUE_TYPE)
+                &mut Data::Array(_)  => err!(ERROR_INVALID_VALUE_TYPE)
             }
         }
     }//}}}

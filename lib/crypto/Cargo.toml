@@ -1,5 +1,5 @@
 [package]
-name = "var"
+name = "crypto"
 version = "0.1.0"
 authors = ["Jiří Zuzaňák <zuzanakjiri@gmail.com>"]
 

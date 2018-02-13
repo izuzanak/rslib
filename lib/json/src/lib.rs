@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+#[macro_use] extern crate err;
 #[macro_use] extern crate var;
 
 use var::Var;
@@ -608,7 +609,7 @@ impl<'a> Parser<'a>
         }
     }
 
-    fn parse_source(&mut self) -> Result<Var,&'static str>
+    fn parse_source(&mut self) -> Result<Var,err::Error>
     {/*{{{*/
         let mut term_source = TermSource::new(&self.source);
 
@@ -627,7 +628,7 @@ impl<'a> Parser<'a>
 
                 // - ERROR -
                 if ret_term == IDX_NOT_EXIST {
-                    return Err(JSON_PARSE_ERROR_UNRECOGNIZED_TERMINAL);
+                    return err!(JSON_PARSE_ERROR_UNRECOGNIZED_TERMINAL);
                 }
 
                 // - skipping of _SKIP_ terminals -
@@ -641,7 +642,7 @@ impl<'a> Parser<'a>
 
             // - ERROR -
             if parse_action == IDX_NOT_EXIST {
-                return Err(JSON_PARSE_ERROR_INVALID_SYNTAX);
+                return err!(JSON_PARSE_ERROR_INVALID_SYNTAX);
             }
 
             // - action SHIFT -
@@ -692,7 +693,7 @@ impl<'a> Parser<'a>
 
                 // - ERROR -
                 {
-                    return Err(JSON_PARSE_ERROR);
+                    return err!(JSON_PARSE_ERROR);
                 }
 
                 // - remove rule body from stack -
@@ -893,7 +894,7 @@ impl<'a> Parser<'a>
     }//}}}
 }//}}}
 
-pub fn parse(source:&str) -> Result<Var,&'static str> {
+pub fn parse(source:&str) -> Result<Var,err::Error> {
     Parser::new(source.as_bytes()).parse_source()
 }
 
@@ -939,7 +940,7 @@ impl Creator {
         }
     }//}}}
 
-    fn create(&mut self,var:&Var) -> Result<&mut Creator,&'static str>
+    fn create(&mut self,var:&Var) -> Result<&mut Creator,err::Error>
     {//{{{
         match var.data() {
             &Data::Blank => { self.result.push_str("null"); },
@@ -985,7 +986,7 @@ impl Creator {
                             self.result.push('"');
                             self.result.push(':');
                         }
-                        _ => return Err(JSON_CREATE_NO_STRING_DICT_KEY),
+                        _ => return err!(JSON_CREATE_NO_STRING_DICT_KEY),
                     }
 
                     match self.create(&item) {
@@ -1017,7 +1018,7 @@ impl Creator {
         self.result.push_str(self.indent_buffer.get(0..self.indent_size).unwrap());
     }
 
-    fn create_nice(&mut self,var:&Var) -> Result<&mut Creator,&'static str>
+    fn create_nice(&mut self,var:&Var) -> Result<&mut Creator,err::Error>
     {//{{{
         match var.data() {
             &Data::Blank => { self.result.push_str("null"); },
@@ -1081,7 +1082,7 @@ impl Creator {
                                 self.result.push('"');
                                 self.result.push(':');
                             }
-                            _ => return Err(JSON_CREATE_NO_STRING_DICT_KEY),
+                            _ => return err!(JSON_CREATE_NO_STRING_DICT_KEY),
                         }
 
                         match self.create_nice(&item) {
@@ -1108,14 +1109,14 @@ impl Creator {
     }
 }
 
-pub fn create(var:&Var) -> Result<String,&'static str> {
+pub fn create(var:&Var) -> Result<String,err::Error> {
     match Creator::new().create(var) {
         Ok(ref mut creator) => Ok(creator.result()),
         Err(err) => Err(err),
     }
 }
 
-pub fn create_nice(var:&Var,tab_str:&str) -> Result<String,&'static str> {
+pub fn create_nice(var:&Var,tab_str:&str) -> Result<String,err::Error> {
     match Creator::new_nice(tab_str).create_nice(var) {
         Ok(ref mut creator) => Ok(creator.result()),
         Err(err) => Err(err),
@@ -1129,8 +1130,8 @@ use super::*;
 #[test]
 fn parse_t0()
 {//{{{
-    assert_eq!(parse("null"),Err(JSON_PARSE_ERROR_INVALID_SYNTAX));
-    assert_eq!(parse("'Hello'"),Err(JSON_PARSE_ERROR_UNRECOGNIZED_TERMINAL));
+    assert_eq!(parse("null"),test_err!(JSON_PARSE_ERROR_INVALID_SYNTAX));
+    assert_eq!(parse("'Hello'"),test_err!(JSON_PARSE_ERROR_UNRECOGNIZED_TERMINAL));
 
     println!("{}",parse("{\"value\":null}").unwrap());
     println!("{}",parse("{\"value\":false}").unwrap());
@@ -1206,7 +1207,7 @@ fn create_t0()
 #[test]
 fn create_t1()
 {//{{{
-    assert_eq!(create(&var!({i(1):s("one")})),Err(JSON_CREATE_NO_STRING_DICT_KEY));
+    assert_eq!(create(&var!({i(1):s("one")})),test_err!(JSON_CREATE_NO_STRING_DICT_KEY));
 }//}}}
 
 #[test]
