@@ -3,7 +3,6 @@
 #[macro_use] extern crate err;
 
 static CRYPTO_INVALID_BASE16_DATA_SIZE:&str = "invalid base16 data size";
-static CRYPTO_CSTRING_MISSING_TERMINATING_ZERO:&str = "missing terminating zero of C string";
 static CRYPTO_DIGEST_INVALID_ALGORITHM_NAME:&str = "invalid name of digest algorithm";
 static CRYPTO_DIGEST_CREATE_INIT_ERROR:&str = "error while initializing message digest context";
 static CRYPTO_DIGEST_UPDATE_ERROR:&str = "error while updating message digest";
@@ -221,7 +220,7 @@ impl DigestInfo {
     pub fn by_name(a_name:&str) -> Result<DigestInfo,err::Error>
     {//{{{
         if a_name.as_bytes().last() != Some(&0u8) {
-            return err!(CRYPTO_CSTRING_MISSING_TERMINATING_ZERO);
+            return err!(err::CSTRING_MISSING_TERMINATING_ZERO);
         }
 
         unsafe {
@@ -324,7 +323,7 @@ impl CipherInfo {
     pub fn by_name(a_name:&str) -> Result<CipherInfo,err::Error>
     {//{{{
         if a_name.as_bytes().last() != Some(&0u8) {
-            return err!(CRYPTO_CSTRING_MISSING_TERMINATING_ZERO);
+            return err!(err::CSTRING_MISSING_TERMINATING_ZERO);
         }
 
         unsafe {
@@ -572,8 +571,8 @@ fn digest_t0()
 {//{{{
     init();
 
-    match DigestInfo::by_name("") { Err(err) => { assert_eq!(err.descr,CRYPTO_CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(ERROR_TEST_FAILED) }
-    match DigestInfo::by_name("sha256") { Err(err) => { assert_eq!(err.descr,CRYPTO_CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(ERROR_TEST_FAILED) }
+    match DigestInfo::by_name("") { Err(err) => { assert_eq!(err.descr,err::CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(ERROR_TEST_FAILED) }
+    match DigestInfo::by_name("sha256") { Err(err) => { assert_eq!(err.descr,err::CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(ERROR_TEST_FAILED) }
     match DigestInfo::by_name("sha255\0") { Err(err) => { assert_eq!(err.descr,CRYPTO_DIGEST_INVALID_ALGORITHM_NAME) } _ => panic!(ERROR_TEST_FAILED) }
     match DigestInfo::by_name("sha256\0") { Ok(_) => {} _ => panic!(ERROR_TEST_FAILED) }
 
@@ -594,8 +593,8 @@ fn encrypt_t0()
 {//{{{
     init();
 
-    match CipherInfo::by_name("") { Err(err) => { assert_eq!(err.descr,CRYPTO_CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(ERROR_TEST_FAILED) }
-    match CipherInfo::by_name("AES-256-CBC") { Err(err) => { assert_eq!(err.descr,CRYPTO_CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(ERROR_TEST_FAILED) }
+    match CipherInfo::by_name("") { Err(err) => { assert_eq!(err.descr,err::CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(ERROR_TEST_FAILED) }
+    match CipherInfo::by_name("AES-256-CBC") { Err(err) => { assert_eq!(err.descr,err::CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(ERROR_TEST_FAILED) }
     match CipherInfo::by_name("AES-256-CBB\0") { Err(err) => { assert_eq!(err.descr,CRYPTO_CIPHER_INVALID_ALGORITHM_NAME) } _ => panic!(ERROR_TEST_FAILED) }
     match CipherInfo::by_name("AES-256-CBC\0") { Ok(_) => {} _ => panic!(ERROR_TEST_FAILED) }
 

@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+pub static CSTRING_MISSING_TERMINATING_ZERO:&str = "missing terminating zero of C string";
+
 #[derive(Debug)]
 pub struct Error {
     pub descr:&'static str
@@ -7,7 +9,7 @@ pub struct Error {
 
 #[macro_export]
 macro_rules! err {
-    ($descr:tt) => {{
+    ($descr:expr) => {{
         println!("ERROR: {}: in {} +{}",$descr,file!(),line!());
         Err($crate::Error{descr:$descr})
     }}
@@ -15,7 +17,7 @@ macro_rules! err {
 
 #[macro_export]
 macro_rules! test_err {
-    ($descr:tt) => {
+    ($descr:expr) => {
         Err($crate::Error{descr:$descr})
     }
 }
