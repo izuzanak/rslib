@@ -165,9 +165,9 @@ impl Base16 {
 
             let first = a_data[ch_idx];
             match first {
-                48 ...  57 => ch = first - 48,
-                97 ... 102 => ch = 10 + (first - 97),
-                65 ...  70 => ch = 10 + (first - 65),
+                48 ..=  57 => ch = first - 48,
+                97 ..= 102 => ch = 10 + (first - 97),
+                65 ..=  70 => ch = 10 + (first - 65),
                 _ => return err!(CRYPTO_INVALID_BASE16_DATA_SIZE)
             }
 
@@ -175,9 +175,9 @@ impl Base16 {
 
             let second = a_data[ch_idx + 1];
             match second {
-                48 ...  57 => ch += second - 48,
-                97 ... 102 => ch += 10 + (second - 97),
-                65 ...  70 => ch += 10 + (second - 65),
+                48 ..=  57 => ch += second - 48,
+                97 ..= 102 => ch += 10 + (second - 97),
+                65 ..=  70 => ch += 10 + (second - 65),
                 _ => return err!(CRYPTO_INVALID_BASE16_DATA_SIZE)
             }
 
@@ -606,7 +606,7 @@ fn encrypt_t0()
     assert_eq!(cipher_info.iv_length(),16);
 
     let key = random(cipher_info.key_length());
-    let iv = random(cipher_info.iv_length());;
+    let iv = random(cipher_info.iv_length());
 
     match Encrypt::from_info(&cipher_info,key.as_slice(),iv.as_slice()) { Ok(Encrypt{ctx:_}) => {} _ => panic!(ERROR_TEST_FAILED) }
     match cipher_info.encrypt(key.as_slice(),iv.as_slice()) { Ok(Encrypt{ctx:_}) => {} _ => panic!(ERROR_TEST_FAILED) }

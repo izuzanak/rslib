@@ -17,7 +17,7 @@ static JSON_PARSE_ERROR:&str = "json parse error";
 const IDX_NOT_EXIST:u32 = std::u32::MAX;
 
 const RULE_CNT:usize = 24;
-const RULE_HEAD_IDXS:[u32;RULE_CNT] = [14, 15, 16, 17, 17, 18, 19, 19, 20, 21, 22, 22, 23, 24, 24, 25, 25, 25, 25, 25, 25, 25, 25, 26, ];
+const RULE_HEAD_IDXS:[u32;RULE_CNT] = [17, 18, 19, 20, 20, 21, 22, 22, 23, 24, 25, 25, 26, 27, 27, 28, 28, 28, 28, 28, 28, 28, 28, 29, ];
 const RULE_BODY_LENGTHS:[usize;RULE_CNT] = [1, 2, 2, 1, 2, 1, 3, 1, 3, 2, 1, 2, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ];
 
 // - lalr parse table -
@@ -27,43 +27,43 @@ macro_rules! reduce { ($e:expr) => (LALR_TABLE_REDUCE_BASE + $e) }
 macro_rules! goto   { ($e:expr) => ($e) }
 
 const LALR_TABLE_REDUCE_BASE:u32 = 0x80000000;
-const TERMINAL_PLUS_NONTERMINAL_CNT:u32 = 27;
+const TERMINAL_PLUS_NONTERMINAL_CNT:u32 = 30;
 const LALR_STATE_CNT:usize = 32;
 
 const LALR_TABLE:[u32;LALR_STATE_CNT*(TERMINAL_PLUS_NONTERMINAL_CNT as usize)] =
 [/*{{{*/
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,    shift!(5),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,     goto!(1),     goto!(2),     goto!(3),     goto!(4),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,    shift!(6),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,    shift!(7),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-   shift!(11),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(3),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,     goto!(8),     goto!(9),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,    goto!(10),
-   reduce!(5),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(5),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(2),        BLANK,   reduce!(2),   reduce!(2),        BLANK,        BLANK,   reduce!(2),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(4),        BLANK,        BLANK,   shift!(12),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(7),        BLANK,        BLANK,   reduce!(7),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   shift!(13),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(23),        BLANK,  reduce!(23),  reduce!(23),  reduce!(23),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-   shift!(11),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,    goto!(14),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,    goto!(10),
-   shift!(11),   shift!(17),   shift!(18),   shift!(21),   shift!(22),   shift!(23),    shift!(5),        BLANK,   shift!(26),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,    goto!(19),     goto!(3),     goto!(4),        BLANK,        BLANK,    goto!(20),    goto!(24),    goto!(25),        BLANK,    goto!(15),    goto!(16),
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(6),        BLANK,        BLANK,   reduce!(6),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(8),        BLANK,        BLANK,   reduce!(8),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(15),        BLANK,  reduce!(15),  reduce!(15),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(16),        BLANK,  reduce!(16),  reduce!(16),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(17),        BLANK,  reduce!(17),  reduce!(17),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(18),        BLANK,  reduce!(18),  reduce!(18),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(19),        BLANK,  reduce!(19),  reduce!(19),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(20),        BLANK,  reduce!(20),  reduce!(20),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(21),        BLANK,  reduce!(21),  reduce!(21),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(22),        BLANK,  reduce!(22),  reduce!(22),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   shift!(27),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-   shift!(11),   shift!(17),   shift!(18),   shift!(21),   shift!(22),   shift!(23),    shift!(5),        BLANK,   shift!(26),  reduce!(10),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,    goto!(19),     goto!(3),     goto!(4),        BLANK,        BLANK,    goto!(20),    goto!(24),    goto!(25),    goto!(28),    goto!(29),    goto!(16),
-  reduce!(12),  reduce!(12),  reduce!(12),  reduce!(12),  reduce!(12),  reduce!(12),  reduce!(12),        BLANK,  reduce!(12),  reduce!(12),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(9),        BLANK,   reduce!(9),   reduce!(9),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(11),   shift!(30),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(14),  reduce!(14),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
-   shift!(11),   shift!(17),   shift!(18),   shift!(21),   shift!(22),   shift!(23),    shift!(5),        BLANK,   shift!(26),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,    goto!(19),     goto!(3),     goto!(4),        BLANK,        BLANK,    goto!(20),    goto!(24),    goto!(25),        BLANK,    goto!(31),    goto!(16),
-        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(13),  reduce!(13),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+   shift!(11),    shift!(4),    shift!(5),    shift!(8),    shift!(9),   shift!(10),   shift!(16),        BLANK,   shift!(17),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,     goto!(1),     goto!(6),    goto!(12),    goto!(14),        BLANK,        BLANK,     goto!(7),    goto!(13),    goto!(15),        BLANK,     goto!(2),     goto!(3),
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   shift!(18),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(15),        BLANK,  reduce!(15),  reduce!(15),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(15),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(16),        BLANK,  reduce!(16),  reduce!(16),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(16),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(17),        BLANK,  reduce!(17),  reduce!(17),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(17),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(18),        BLANK,  reduce!(18),  reduce!(18),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(18),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(19),        BLANK,  reduce!(19),  reduce!(19),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(19),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(20),        BLANK,  reduce!(20),  reduce!(20),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(20),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(21),        BLANK,  reduce!(21),  reduce!(21),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(21),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(22),        BLANK,  reduce!(22),  reduce!(22),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(22),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(23),        BLANK,  reduce!(23),  reduce!(23),  reduce!(23),        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(23),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   shift!(19),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   shift!(20),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+   shift!(11),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(3),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,    goto!(21),    goto!(22),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,    goto!(23),
+   shift!(11),    shift!(4),    shift!(5),    shift!(8),    shift!(9),   shift!(10),   shift!(16),        BLANK,   shift!(17),  reduce!(10),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,     goto!(6),    goto!(12),    goto!(14),        BLANK,        BLANK,     goto!(7),    goto!(13),    goto!(15),    goto!(24),    goto!(25),     goto!(3),
+   reduce!(5),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(5),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+  reduce!(12),  reduce!(12),  reduce!(12),  reduce!(12),  reduce!(12),  reduce!(12),  reduce!(12),        BLANK,  reduce!(12),  reduce!(12),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(2),        BLANK,   reduce!(2),   reduce!(2),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(2),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(9),        BLANK,   reduce!(9),   reduce!(9),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(9),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(4),        BLANK,        BLANK,   shift!(26),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(7),        BLANK,        BLANK,   reduce!(7),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   shift!(27),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(11),   shift!(28),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(14),  reduce!(14),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+   shift!(11),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,    goto!(29),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,    goto!(23),
+   shift!(11),    shift!(4),    shift!(5),    shift!(8),    shift!(9),   shift!(10),   shift!(16),        BLANK,   shift!(17),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,     goto!(6),    goto!(12),    goto!(14),        BLANK,        BLANK,     goto!(7),    goto!(13),    goto!(15),        BLANK,    goto!(30),     goto!(3),
+   shift!(11),    shift!(4),    shift!(5),    shift!(8),    shift!(9),   shift!(10),   shift!(16),        BLANK,   shift!(17),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,     goto!(6),    goto!(12),    goto!(14),        BLANK,        BLANK,     goto!(7),    goto!(13),    goto!(15),        BLANK,    goto!(31),     goto!(3),
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(6),        BLANK,        BLANK,   reduce!(6),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,   reduce!(8),        BLANK,        BLANK,   reduce!(8),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
+        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,  reduce!(13),  reduce!(13),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
 ];/*}}}*/
 
 struct LalrStackElement {
@@ -112,8 +112,8 @@ impl<'a> TermSource<'a>
     }
 
     fn recognize_terminal(&mut self) -> u32 {
-      self.start = true;
-      self.state_0()
+        self.start = true;
+        self.state_0()
     }
 
     // - STATE 0 -
@@ -130,21 +130,23 @@ impl<'a> TermSource<'a>
 
         match self.in_char {
             0x00          => self.state_1(),
-            0x09 ... 0x0a => self.state_15(),
-            0x20          => self.state_15(),
+            0x08 ..= 0x0d => self.state_17(),
+            0x20          => self.state_17(),
             0x22          => self.state_2(),
-            0x2c          => self.state_3(),
-            0x2d          => self.state_4(),
-            0x30          => self.state_5(),
-            0x31 ... 0x39 => self.state_6(),
-            0x3a          => self.state_7(),
-            0x5b          => self.state_8(),
-            0x5d          => self.state_9(),
-            0x66          => self.state_10(),
-            0x6e          => self.state_11(),
-            0x74          => self.state_12(),
-            0x7b          => self.state_13(),
-            0x7d          => self.state_14(),
+            0x23          => self.state_3(),
+            0x2c          => self.state_4(),
+            0x2d          => self.state_5(),
+            0x2f          => self.state_6(),
+            0x30          => self.state_7(),
+            0x31 ..= 0x39 => self.state_8(),
+            0x3a          => self.state_9(),
+            0x5b          => self.state_10(),
+            0x5d          => self.state_11(),
+            0x66          => self.state_12(),
+            0x6e          => self.state_13(),
+            0x74          => self.state_14(),
+            0x7b          => self.state_15(),
+            0x7d          => self.state_16(),
               _           => IDX_NOT_EXIST
         }
     }//}}}
@@ -152,9 +154,9 @@ impl<'a> TermSource<'a>
     // - STATE 1 -
     fn state_1(&mut self) -> u32
     {//{{{
-        close_char!(self,13);
+        close_char!(self,16);
 
-        13
+        16
     }//}}}
 
     // - STATE 2 -
@@ -164,111 +166,112 @@ impl<'a> TermSource<'a>
         get_next_char!(self);
 
         match self.in_char {
-            0x00 ... 0x21 => self.state_2(),
-            0x22          => self.state_16(),
-            0x23 ... 0x5b => self.state_2(),
-            0x5c          => self.state_17(),
-            0x5d ... 0xff => self.state_2(),
-              _           => IDX_NOT_EXIST
+            0x00 ..= 0x21 => self.state_2(),
+            0x22          => self.state_18(),
+            0x23 ..= 0x5b => self.state_2(),
+            0x5c          => self.state_19(),
+            0x5d ..= 0xff => self.state_2(),
         }
     }//}}}
 
     // - STATE 3 -
     fn state_3(&mut self) -> u32
     {//{{{
-        close_char!(self,10);
+        close_char!(self,IDX_NOT_EXIST);
+        get_next_char!(self);
 
-        10
+        match self.in_char {
+            0x00 ..= 0x09 => self.state_3(),
+            0x0a          => self.state_20(),
+            0x0b ..= 0xff => self.state_3(),
+        }
     }//}}}
 
     // - STATE 4 -
     fn state_4(&mut self) -> u32
     {//{{{
-        close_char!(self,IDX_NOT_EXIST);
-        get_next_char!(self);
+        close_char!(self,10);
 
-        match self.in_char {
-            0x30          => self.state_5(),
-            0x31 ... 0x39 => self.state_6(),
-              _           => IDX_NOT_EXIST
-        }
+        10
     }//}}}
 
     // - STATE 5 -
     fn state_5(&mut self) -> u32
     {//{{{
-        close_char!(self,1);
+        close_char!(self,IDX_NOT_EXIST);
         get_next_char!(self);
 
         match self.in_char {
-            0x2e          => self.state_18(),
-            0x45          => self.state_19(),
-            0x65          => self.state_19(),
-              _           => 1
+            0x30          => self.state_7(),
+            0x31 ..= 0x39 => self.state_8(),
+              _           => IDX_NOT_EXIST
         }
     }//}}}
 
     // - STATE 6 -
     fn state_6(&mut self) -> u32
     {//{{{
-        close_char!(self,1);
+        close_char!(self,IDX_NOT_EXIST);
         get_next_char!(self);
 
         match self.in_char {
-            0x2e          => self.state_18(),
-            0x30 ... 0x39 => self.state_6(),
-            0x45          => self.state_19(),
-            0x65          => self.state_19(),
-              _           => 1
+            0x2a          => self.state_21(),
+            0x2f          => self.state_22(),
+              _           => IDX_NOT_EXIST
         }
     }//}}}
 
     // - STATE 7 -
     fn state_7(&mut self) -> u32
     {//{{{
+        close_char!(self,1);
+        get_next_char!(self);
+
+        match self.in_char {
+            0x2e          => self.state_23(),
+            0x45          => self.state_24(),
+            0x65          => self.state_24(),
+              _           => 1
+        }
+    }//}}}
+
+    // - STATE 8 -
+    fn state_8(&mut self) -> u32
+    {//{{{
+        close_char!(self,1);
+        get_next_char!(self);
+
+        match self.in_char {
+            0x2e          => self.state_23(),
+            0x30 ..= 0x39 => self.state_8(),
+            0x45          => self.state_24(),
+            0x65          => self.state_24(),
+              _           => 1
+        }
+    }//}}}
+
+    // - STATE 9 -
+    fn state_9(&mut self) -> u32
+    {//{{{
         close_char!(self,11);
 
         11
     }//}}}
 
-    // - STATE 8 -
-    fn state_8(&mut self) -> u32
+    // - STATE 10 -
+    fn state_10(&mut self) -> u32
     {//{{{
         close_char!(self,8);
 
         8
     }//}}}
 
-    // - STATE 9 -
-    fn state_9(&mut self) -> u32
+    // - STATE 11 -
+    fn state_11(&mut self) -> u32
     {//{{{
         close_char!(self,9);
 
         9
-    }//}}}
-
-    // - STATE 10 -
-    fn state_10(&mut self) -> u32
-    {//{{{
-        close_char!(self,IDX_NOT_EXIST);
-        get_next_char!(self);
-
-        match self.in_char {
-            0x61          => self.state_20(),
-              _           => IDX_NOT_EXIST
-        }
-    }//}}}
-
-    // - STATE 11 -
-    fn state_11(&mut self) -> u32
-    {//{{{
-        close_char!(self,IDX_NOT_EXIST);
-        get_next_char!(self);
-
-        match self.in_char {
-            0x75          => self.state_21(),
-              _           => IDX_NOT_EXIST
-        }
     }//}}}
 
     // - STATE 12 -
@@ -278,7 +281,7 @@ impl<'a> TermSource<'a>
         get_next_char!(self);
 
         match self.in_char {
-            0x72          => self.state_22(),
+            0x61          => self.state_25(),
               _           => IDX_NOT_EXIST
         }
     }//}}}
@@ -286,42 +289,66 @@ impl<'a> TermSource<'a>
     // - STATE 13 -
     fn state_13(&mut self) -> u32
     {//{{{
+        close_char!(self,IDX_NOT_EXIST);
+        get_next_char!(self);
+
+        match self.in_char {
+            0x75          => self.state_26(),
+              _           => IDX_NOT_EXIST
+        }
+    }//}}}
+
+    // - STATE 14 -
+    fn state_14(&mut self) -> u32
+    {//{{{
+        close_char!(self,IDX_NOT_EXIST);
+        get_next_char!(self);
+
+        match self.in_char {
+            0x72          => self.state_27(),
+              _           => IDX_NOT_EXIST
+        }
+    }//}}}
+
+    // - STATE 15 -
+    fn state_15(&mut self) -> u32
+    {//{{{
         close_char!(self,6);
 
         6
     }//}}}
 
-    // - STATE 14 -
-    fn state_14(&mut self) -> u32
+    // - STATE 16 -
+    fn state_16(&mut self) -> u32
     {//{{{
         close_char!(self,7);
 
         7
     }//}}}
 
-    // - STATE 15 -
-    fn state_15(&mut self) -> u32
+    // - STATE 17 -
+    fn state_17(&mut self) -> u32
     {//{{{
         close_char!(self,12);
         get_next_char!(self);
 
         match self.in_char {
-            0x09 ... 0x0a => self.state_15(),
-            0x20          => self.state_15(),
+            0x08 ..= 0x0d => self.state_17(),
+            0x20          => self.state_17(),
               _           => 12
         }
     }//}}}
 
-    // - STATE 16 -
-    fn state_16(&mut self) -> u32
+    // - STATE 18 -
+    fn state_18(&mut self) -> u32
     {//{{{
         close_char!(self,0);
 
         0
     }//}}}
 
-    // - STATE 17 -
-    fn state_17(&mut self) -> u32
+    // - STATE 19 -
+    fn state_19(&mut self) -> u32
     {//{{{
         close_char!(self,IDX_NOT_EXIST);
         get_next_char!(self);
@@ -335,35 +362,7 @@ impl<'a> TermSource<'a>
             0x6e          => self.state_2(),
             0x72          => self.state_2(),
             0x74          => self.state_2(),
-            0x75          => self.state_23(),
-              _           => IDX_NOT_EXIST
-        }
-    }//}}}
-
-    // - STATE 18 -
-    fn state_18(&mut self) -> u32
-    {//{{{
-        close_char!(self,2);
-        get_next_char!(self);
-
-        match self.in_char {
-            0x30 ... 0x39 => self.state_18(),
-            0x45          => self.state_19(),
-            0x65          => self.state_19(),
-              _           => 2
-        }
-    }//}}}
-
-    // - STATE 19 -
-    fn state_19(&mut self) -> u32
-    {//{{{
-        close_char!(self,IDX_NOT_EXIST);
-        get_next_char!(self);
-
-        match self.in_char {
-            0x2b          => self.state_24(),
-            0x2d          => self.state_24(),
-            0x30 ... 0x39 => self.state_25(),
+            0x75          => self.state_28(),
               _           => IDX_NOT_EXIST
         }
     }//}}}
@@ -371,13 +370,9 @@ impl<'a> TermSource<'a>
     // - STATE 20 -
     fn state_20(&mut self) -> u32
     {//{{{
-        close_char!(self,IDX_NOT_EXIST);
-        get_next_char!(self);
+        close_char!(self,13);
 
-        match self.in_char {
-            0x6c          => self.state_26(),
-              _           => IDX_NOT_EXIST
-        }
+        13
     }//}}}
 
     // - STATE 21 -
@@ -387,8 +382,9 @@ impl<'a> TermSource<'a>
         get_next_char!(self);
 
         match self.in_char {
-            0x6c          => self.state_27(),
-              _           => IDX_NOT_EXIST
+            0x00 ..= 0x29 => self.state_21(),
+            0x2a          => self.state_29(),
+            0x2b ..= 0xff => self.state_21(),
         }
     }//}}}
 
@@ -399,22 +395,23 @@ impl<'a> TermSource<'a>
         get_next_char!(self);
 
         match self.in_char {
-            0x75          => self.state_28(),
-              _           => IDX_NOT_EXIST
+            0x00 ..= 0x09 => self.state_22(),
+            0x0a          => self.state_30(),
+            0x0b ..= 0xff => self.state_22(),
         }
     }//}}}
 
     // - STATE 23 -
     fn state_23(&mut self) -> u32
     {//{{{
-        close_char!(self,IDX_NOT_EXIST);
+        close_char!(self,2);
         get_next_char!(self);
 
         match self.in_char {
-            0x30 ... 0x39 => self.state_29(),
-            0x41 ... 0x46 => self.state_29(),
-            0x61 ... 0x66 => self.state_29(),
-              _           => IDX_NOT_EXIST
+            0x30 ..= 0x39 => self.state_23(),
+            0x45          => self.state_24(),
+            0x65          => self.state_24(),
+              _           => 2
         }
     }//}}}
 
@@ -425,7 +422,9 @@ impl<'a> TermSource<'a>
         get_next_char!(self);
 
         match self.in_char {
-            0x30 ... 0x39 => self.state_25(),
+            0x2b          => self.state_31(),
+            0x2d          => self.state_31(),
+            0x30 ..= 0x39 => self.state_32(),
               _           => IDX_NOT_EXIST
         }
     }//}}}
@@ -433,12 +432,12 @@ impl<'a> TermSource<'a>
     // - STATE 25 -
     fn state_25(&mut self) -> u32
     {//{{{
-        close_char!(self,2);
+        close_char!(self,IDX_NOT_EXIST);
         get_next_char!(self);
 
         match self.in_char {
-            0x30 ... 0x39 => self.state_25(),
-              _           => 2
+            0x6c          => self.state_33(),
+              _           => IDX_NOT_EXIST
         }
     }//}}}
 
@@ -449,7 +448,7 @@ impl<'a> TermSource<'a>
         get_next_char!(self);
 
         match self.in_char {
-            0x73          => self.state_30(),
+            0x6c          => self.state_34(),
               _           => IDX_NOT_EXIST
         }
     }//}}}
@@ -461,7 +460,7 @@ impl<'a> TermSource<'a>
         get_next_char!(self);
 
         match self.in_char {
-            0x6c          => self.state_31(),
+            0x75          => self.state_35(),
               _           => IDX_NOT_EXIST
         }
     }//}}}
@@ -473,7 +472,9 @@ impl<'a> TermSource<'a>
         get_next_char!(self);
 
         match self.in_char {
-            0x65          => self.state_32(),
+            0x30 ..= 0x39 => self.state_36(),
+            0x41 ..= 0x46 => self.state_36(),
+            0x61 ..= 0x66 => self.state_36(),
               _           => IDX_NOT_EXIST
         }
     }//}}}
@@ -485,39 +486,42 @@ impl<'a> TermSource<'a>
         get_next_char!(self);
 
         match self.in_char {
-            0x30 ... 0x39 => self.state_33(),
-            0x41 ... 0x46 => self.state_33(),
-            0x61 ... 0x66 => self.state_33(),
-              _           => IDX_NOT_EXIST
+            0x00 ..= 0x2e => self.state_21(),
+            0x2f          => self.state_37(),
+            0x30 ..= 0xff => self.state_21(),
         }
     }//}}}
 
     // - STATE 30 -
     fn state_30(&mut self) -> u32
     {//{{{
-        close_char!(self,IDX_NOT_EXIST);
-        get_next_char!(self);
+        close_char!(self,14);
 
-        match self.in_char {
-            0x65          => self.state_34(),
-              _           => IDX_NOT_EXIST
-        }
+        14
     }//}}}
 
     // - STATE 31 -
     fn state_31(&mut self) -> u32
     {//{{{
-        close_char!(self,5);
+        close_char!(self,IDX_NOT_EXIST);
+        get_next_char!(self);
 
-        5
+        match self.in_char {
+            0x30 ..= 0x39 => self.state_32(),
+              _           => IDX_NOT_EXIST
+        }
     }//}}}
 
     // - STATE 32 -
     fn state_32(&mut self) -> u32
     {//{{{
-        close_char!(self,3);
+        close_char!(self,2);
+        get_next_char!(self);
 
-        3
+        match self.in_char {
+            0x30 ..= 0x39 => self.state_32(),
+              _           => 2
+        }
     }//}}}
 
     // - STATE 33 -
@@ -527,9 +531,7 @@ impl<'a> TermSource<'a>
         get_next_char!(self);
 
         match self.in_char {
-            0x30 ... 0x39 => self.state_35(),
-            0x41 ... 0x46 => self.state_35(),
-            0x61 ... 0x66 => self.state_35(),
+            0x73          => self.state_38(),
               _           => IDX_NOT_EXIST
         }
     }//}}}
@@ -537,9 +539,13 @@ impl<'a> TermSource<'a>
     // - STATE 34 -
     fn state_34(&mut self) -> u32
     {//{{{
-        close_char!(self,4);
+        close_char!(self,IDX_NOT_EXIST);
+        get_next_char!(self);
 
-        4
+        match self.in_char {
+            0x6c          => self.state_39(),
+              _           => IDX_NOT_EXIST
+        }
     }//}}}
 
     // - STATE 35 -
@@ -549,9 +555,93 @@ impl<'a> TermSource<'a>
         get_next_char!(self);
 
         match self.in_char {
-            0x30 ... 0x39 => self.state_2(),
-            0x41 ... 0x46 => self.state_2(),
-            0x61 ... 0x66 => self.state_2(),
+            0x65          => self.state_40(),
+              _           => IDX_NOT_EXIST
+        }
+    }//}}}
+
+    // - STATE 36 -
+    fn state_36(&mut self) -> u32
+    {//{{{
+        close_char!(self,IDX_NOT_EXIST);
+        get_next_char!(self);
+
+        match self.in_char {
+            0x30 ..= 0x39 => self.state_41(),
+            0x41 ..= 0x46 => self.state_41(),
+            0x61 ..= 0x66 => self.state_41(),
+              _           => IDX_NOT_EXIST
+        }
+    }//}}}
+
+    // - STATE 37 -
+    fn state_37(&mut self) -> u32
+    {//{{{
+        close_char!(self,15);
+
+        15
+    }//}}}
+
+    // - STATE 38 -
+    fn state_38(&mut self) -> u32
+    {//{{{
+        close_char!(self,IDX_NOT_EXIST);
+        get_next_char!(self);
+
+        match self.in_char {
+            0x65          => self.state_42(),
+              _           => IDX_NOT_EXIST
+        }
+    }//}}}
+
+    // - STATE 39 -
+    fn state_39(&mut self) -> u32
+    {//{{{
+        close_char!(self,5);
+
+        5
+    }//}}}
+
+    // - STATE 40 -
+    fn state_40(&mut self) -> u32
+    {//{{{
+        close_char!(self,3);
+
+        3
+    }//}}}
+
+    // - STATE 41 -
+    fn state_41(&mut self) -> u32
+    {//{{{
+        close_char!(self,IDX_NOT_EXIST);
+        get_next_char!(self);
+
+        match self.in_char {
+            0x30 ..= 0x39 => self.state_43(),
+            0x41 ..= 0x46 => self.state_43(),
+            0x61 ..= 0x66 => self.state_43(),
+              _           => IDX_NOT_EXIST
+        }
+    }//}}}
+
+    // - STATE 42 -
+    fn state_42(&mut self) -> u32
+    {//{{{
+        close_char!(self,4);
+
+        4
+    }//}}}
+
+    // - STATE 43 -
+    fn state_43(&mut self) -> u32
+    {//{{{
+        close_char!(self,IDX_NOT_EXIST);
+        get_next_char!(self);
+
+        match self.in_char {
+            0x30 ..= 0x39 => self.state_2(),
+            0x41 ..= 0x46 => self.state_2(),
+            0x61 ..= 0x66 => self.state_2(),
               _           => IDX_NOT_EXIST
         }
     }//}}}
@@ -632,7 +722,7 @@ impl<'a> Parser<'a>
                 }
 
                 // - skipping of _SKIP_ terminals -
-                if ret_term == 12 {
+                if ret_term >= 12 && ret_term <= 15 {
                     ret_term = IDX_NOT_EXIST;
                 }
             }
@@ -649,7 +739,7 @@ impl<'a> Parser<'a>
             if parse_action < LALR_TABLE_REDUCE_BASE {
 
                 // - end on _END_ terminal -
-                if ret_term == 13 {
+                if ret_term == 16 {
                     break;
                 }
 
@@ -707,7 +797,7 @@ impl<'a> Parser<'a>
 
         }
 
-        Ok(var!(v(self.objects.last().unwrap())))
+        Ok(var!(v(self.values.pop().unwrap())))
     }/*}}}*/
 }//}}}
 
@@ -828,7 +918,7 @@ impl<'a> Parser<'a>
                                 value <<= 4;
 
                                 if self.source[idx] >= '0' as u8 && self.source[idx] <= '9' as u8 {
-                                    value += (self.source[idx] - '0' as u8) as u32;;
+                                    value += (self.source[idx] - '0' as u8) as u32;
                                 }
                                 else if self.source[idx] >= 'a' as u8 && self.source[idx] <= 'f' as u8 {
                                     value += (10 + (self.source[idx] - 'a' as u8)) as u32;
@@ -1130,7 +1220,7 @@ use super::*;
 #[test]
 fn parse_t0()
 {//{{{
-    assert_eq!(parse("null"),test_err!(JSON_PARSE_ERROR_INVALID_SYNTAX));
+    assert_eq!(parse("null null"),test_err!(JSON_PARSE_ERROR_INVALID_SYNTAX));
     assert_eq!(parse("'Hello'"),test_err!(JSON_PARSE_ERROR_UNRECOGNIZED_TERMINAL));
 
     println!("{}",parse("{\"value\":null}").unwrap());
@@ -1141,6 +1231,16 @@ fn parse_t0()
     println!("{}",parse("{\"value\":\"Hello world\"}").unwrap());
     println!("{}",parse("{\"value\":[1,2,3]}").unwrap());
     println!("{}",parse("{\"value\":{\"one\":1,\"two\":2,\"three\":3}}").unwrap());
+
+    assert_eq!(parse("null"),Ok(var!(blank)));
+    assert_eq!(parse("false"),Ok(var!(false)));
+    assert_eq!(parse("true"),Ok(var!(true)));
+    assert_eq!(parse("123"),Ok(var!(i(123))));
+    assert_eq!(parse("123.45"),Ok(var!(f(123.45))));
+    assert_eq!(parse("\"Hello world\""),Ok(var!(s("Hello world"))));
+    assert_eq!(parse("[1,2,3]"),Ok(var!([i(1),i(2),i(3)])));
+    assert_eq!(parse("{\"one\":1,\"two\":2,\"three\":3}"),
+        Ok(var!({s("one"):i(1),s("two"):i(2),s("three"):i(3)})));
 
     assert_eq!(parse("{\"value\":null}"),Ok(var!({s("value"):blank})));
     assert_eq!(parse("{\"value\":false}"),Ok(var!({s("value"):false})));

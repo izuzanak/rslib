@@ -53,11 +53,13 @@ impl Clock {
     fn gettime() -> Result<i64,err::Error>
     {//{{{
         unsafe {
-            let mut tp:libc::timespec = std::mem::uninitialized();
+            let mut tp = std::mem::MaybeUninit::<libc::timespec>::uninit();
 
-            if libc::clock_gettime(libc::CLOCK_MONOTONIC,&mut tp as *mut _) != 0 {
+            if libc::clock_gettime(libc::CLOCK_MONOTONIC,tp.as_mut_ptr()) != 0 {
                 return err!(CLOCK_CANNOT_GET_TIME);
             }
+
+            let tp = tp.assume_init();
 
             Ok(tp.tv_sec as i64 *1000000000i64 + tp.tv_nsec as i64)
         }

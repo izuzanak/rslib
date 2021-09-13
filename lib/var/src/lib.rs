@@ -34,7 +34,7 @@ impl std::fmt::Display for Data {
                 else {
                     let mut first = true;
                     for item in value {
-                        try!(write!(f,"{}{}",if first { first = false; '[' } else { ',' },item))
+                        write!(f,"{}{}",if first { first = false; '[' } else { ',' },item)?
                     }
                     write!(f,"]")
                 }
@@ -44,7 +44,7 @@ impl std::fmt::Display for Data {
                 else {
                     let mut first = true;
                     for (key,item) in value {
-                        try!(write!(f,"{}{}:{}",if first { first = false; '[' } else { ',' },key,item))
+                        write!(f,"{}{}:{}",if first { first = false; '[' } else { ',' },key,item)?
                     }
                     write!(f,"]")
                 }
