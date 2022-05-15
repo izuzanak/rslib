@@ -1,0 +1,8 @@
+[package]
+name = "linux"
+version = "0.1.0"
+authors = ["Jiří Zuzaňák <zuzanakjiri@gmail.com>"]
+
+[dependencies]
+err = { path = "../err" }
+libc = "0.2"

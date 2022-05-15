@@ -38,7 +38,7 @@ fn execute(a_args:Vec<&str>) -> Result<libc::pid_t,err::Error>
             arguments.push(0 as *const i8);
 
             // - execute target process -
-            if libc::execvp(a_args[0].as_ptr() as *const i8,arguments.as_ptr()) == -1 {
+            if libc::execvp(a_args[0].as_ptr() as *const _,arguments.as_ptr() as *const _) == -1 {
                 libc::exit(0);
             }
         }

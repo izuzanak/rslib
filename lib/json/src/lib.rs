@@ -1254,7 +1254,7 @@ fn parse_t0()
 }//}}}
 
 #[test]
-fn parser_t1()
+fn parse_t1()
 {//{{{
     let json_str =r#"
 {
