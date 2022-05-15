@@ -4,6 +4,7 @@ extern crate libc;
 #[macro_use] extern crate err;
 
 const FD_DUP_ERROR:&str = "error while duplicating file descriptor";
+const FD_OPEN_ERROR:&str = "error while opening file";
 const FD_WRITE_ERROR:&str = "error while writing to file descriptor";
 const FD_READ_ERROR:&str = "error while reading from file descriptor";
 
@@ -14,6 +15,7 @@ use std::os::raw::{c_int,c_ulong};
 extern
 {//{{{
     fn dup(oldfd:c_int) -> c_int;
+    fn open(pathname:*const u8,flags:c_int,mode:libc::mode_t) -> c_int;
     fn close(fd:c_int) -> c_int;
     fn write(fd:c_int,buf:*const u8,count:usize) -> isize;
     fn read(fd:c_int,buf:*mut u8,count:usize) -> isize;
@@ -40,6 +42,22 @@ impl Fd {
         }
 
         Ok(Fd{fd:new_fd})
+    }//}}}
+
+    pub fn open(pathname:&str,flags:c_int,mode:libc::mode_t) -> Result<Fd,err::Error>
+    {//{{{
+        if pathname.as_bytes().last() != Some(&0u8) {
+            return err!(err::CSTRING_MISSING_TERMINATING_ZERO);
+        }
+
+        unsafe {
+            let fd = open(pathname.as_ptr(),flags,mode);
+            if fd == -1 {
+                return err!{FD_OPEN_ERROR}
+            }
+
+            Ok(Fd{fd:fd})
+        }
     }//}}}
 
     pub fn write(&self,src:&[u8]) -> Result<(),err::Error>
@@ -118,11 +136,35 @@ const TEST_FAILED:&str = "Test failed";
 
 #[cfg(test)]
 mod tests {
-//use super::*;
+use super::*;
 
 #[test]
-fn dummy_t0()
+fn open_t0()
 {//{{{
+    let fd = Fd::open("test.txt\0",libc::O_CREAT | libc::O_WRONLY,0o666).unwrap();
+
+    let mut idx = 0;
+    while idx < 10 {
+        fd.write(format!("Hello there, idx: {}\n",idx).as_str().as_bytes()).unwrap();
+        idx += 1;
+    }
+
+    let fd1 = Fd::open("test.txt\0",libc::O_RDONLY,0).unwrap();
+
+    let mut buffer:Vec<u8> = vec![];
+    fd1.read(&mut buffer).unwrap();
+    assert_eq!(buffer,
+"Hello there, idx: 0
+Hello there, idx: 1
+Hello there, idx: 2
+Hello there, idx: 3
+Hello there, idx: 4
+Hello there, idx: 5
+Hello there, idx: 6
+Hello there, idx: 7
+Hello there, idx: 8
+Hello there, idx: 9
+".as_bytes());
 }//}}}
 
 }

@@ -996,23 +996,25 @@ struct Creator {
 }
 
 impl Creator {
-    fn new() -> Creator {
+    fn new() -> Creator
+    {//{{{
         Creator{
             result:String::new(),
             tab_str:String::new(),
             indent_buffer: String::new(),
             indent_size: 0,
         }
-    }
+    }//}}}
 
-    fn new_nice(tab_str:&str) -> Creator {
+    fn new_nice(tab_str:&str) -> Creator
+    {//{{{
         Creator{
             result:String::new(),
             tab_str: String::from(tab_str),
             indent_buffer: String::new(),
             indent_size: 0,
         }
-    }
+    }//}}}
 
     fn append_string(&mut self,string:&String)
     {//{{{
@@ -1092,12 +1094,13 @@ impl Creator {
         Ok(self)
     }//}}}
 
-    fn cn_push_tab(&mut self) {
+    fn cn_push_tab(&mut self)
+    {//{{{
         self.indent_size += self.tab_str.len();
         if self.indent_size > self.indent_buffer.len() {
             self.indent_buffer.push_str(&self.tab_str);
         }
-    }
+    }//}}}
 
     fn cn_pop_tab(&mut self) {
         self.indent_size -= self.tab_str.len()
