@@ -1,6 +1,6 @@
 #[macro_use] extern crate err;
 
-static ERROR_INVALID_VALUE_TYPE:&str = "Invalid value type";
+const ERROR_INVALID_VALUE_TYPE:&str = "Invalid value type";
 
 #[derive(Debug,Clone,PartialEq,PartialOrd)]
 pub enum Data {
@@ -73,34 +73,34 @@ impl Var {
         let loc = Box::new(Loc{data:Data::Blank,refs:std::sync::atomic::AtomicUsize::new(1)});
         Var{loc:Box::into_raw(loc)}
     }
-    pub fn bool(a_val:bool) -> Var {
-        let loc = Box::new(Loc{data:Data::Bool(a_val),refs:std::sync::atomic::AtomicUsize::new(1)});
+    pub fn bool(val:bool) -> Var {
+        let loc = Box::new(Loc{data:Data::Bool(val),refs:std::sync::atomic::AtomicUsize::new(1)});
         Var{loc:Box::into_raw(loc)}
     }
-    pub fn int(a_val:i64) -> Var {
-        let loc = Box::new(Loc{data:Data::Int(a_val),refs:std::sync::atomic::AtomicUsize::new(1)});
+    pub fn int(val:i64) -> Var {
+        let loc = Box::new(Loc{data:Data::Int(val),refs:std::sync::atomic::AtomicUsize::new(1)});
         Var{loc:Box::into_raw(loc)}
     }
-    pub fn float(a_val:f64) -> Var {
-        let loc = Box::new(Loc{data:Data::Float(a_val),refs:std::sync::atomic::AtomicUsize::new(1)});
+    pub fn float(val:f64) -> Var {
+        let loc = Box::new(Loc{data:Data::Float(val),refs:std::sync::atomic::AtomicUsize::new(1)});
         Var{loc:Box::into_raw(loc)}
     }
-    pub fn str(a_val:&str) -> Var {
-        let loc = Box::new(Loc{data:Data::String(String::from(a_val)),refs:std::sync::atomic::AtomicUsize::new(1)});
+    pub fn str(val:&str) -> Var {
+        let loc = Box::new(Loc{data:Data::String(String::from(val)),refs:std::sync::atomic::AtomicUsize::new(1)});
         Var{loc:Box::into_raw(loc)}
     }
-    pub fn array(a_val:Vec<Var>) -> Var {
-        let loc = Box::new(Loc{data:Data::Array(a_val),refs:std::sync::atomic::AtomicUsize::new(1)});
+    pub fn array(val:Vec<Var>) -> Var {
+        let loc = Box::new(Loc{data:Data::Array(val),refs:std::sync::atomic::AtomicUsize::new(1)});
         Var{loc:Box::into_raw(loc)}
     }
-    pub fn dict(a_val:std::collections::BTreeMap<Var,Var>) -> Var {
-        let loc = Box::new(Loc{data:Data::Dict(a_val),refs:std::sync::atomic::AtomicUsize::new(1)});
+    pub fn dict(val:std::collections::BTreeMap<Var,Var>) -> Var {
+        let loc = Box::new(Loc{data:Data::Dict(val),refs:std::sync::atomic::AtomicUsize::new(1)});
         Var{loc:Box::into_raw(loc)}
     }
-    pub fn var(a_val:&Var) -> Var {
+    pub fn var(val:&Var) -> Var {
         unsafe {
-            (*a_val.loc).refs.fetch_add(1,std::sync::atomic::Ordering::Relaxed);
-            Var{loc:a_val.loc}
+            (*val.loc).refs.fetch_add(1,std::sync::atomic::Ordering::Relaxed);
+            Var{loc:val.loc}
         }
     }
     pub fn data(&self) -> &Data {
@@ -406,35 +406,33 @@ macro_rules! var_internal
 mod tests {
 use super::*;
 
-static ERROR_TEST_FAILED:&str = "Test failed";
-
 #[test]
 fn blank_t0()
 {//{{{
-    match Var::blank().data() { &Data::Blank => {} _ => panic!(ERROR_TEST_FAILED) }
+    match Var::blank().data() { &Data::Blank => {} _ => panic!(err::TEST_FAILED) }
 }//}}}
 
 #[test]
 fn bool_t0()
 {//{{{
-    match Var::bool(true).data() { &Data::Bool(true) => {} _ => panic!(ERROR_TEST_FAILED) }
-    match Var::bool(false).data() { &Data::Bool(false) => {} _ => panic!(ERROR_TEST_FAILED) }
+    match Var::bool(true).data() { &Data::Bool(true) => {} _ => panic!(err::TEST_FAILED) }
+    match Var::bool(false).data() { &Data::Bool(false) => {} _ => panic!(err::TEST_FAILED) }
 
     assert_eq!(Var::bool(false).to_bool(),Ok(false));
     assert_eq!(Var::bool(true).to_bool(),Ok(true));
-    if let Err(_) = Var::bool(true).to_int() {} else { panic!(ERROR_TEST_FAILED) }
+    if let Err(_) = Var::bool(true).to_int() {} else { panic!(err::TEST_FAILED) }
 }//}}}
 
 #[test]
 fn int_t0()
 {//{{{
-    match Var::int(10).data() { &Data::Int(10) => {} _ => panic!(ERROR_TEST_FAILED) }
-    match Var::int(123).data() { &Data::Int(123) => {} _ => panic!(ERROR_TEST_FAILED) }
-    match Var::int(-156).data() { &Data::Int(-156) => {} _ => panic!(ERROR_TEST_FAILED) }
+    match Var::int(10).data() { &Data::Int(10) => {} _ => panic!(err::TEST_FAILED) }
+    match Var::int(123).data() { &Data::Int(123) => {} _ => panic!(err::TEST_FAILED) }
+    match Var::int(-156).data() { &Data::Int(-156) => {} _ => panic!(err::TEST_FAILED) }
 
     assert_eq!(Var::int(10).to_int(),Ok(10));
     assert_eq!(Var::int(123).to_int(),Ok(123));
-    if let Err(_) = Var::int(20).to_bool() {} else { panic!(ERROR_TEST_FAILED) }
+    if let Err(_) = Var::int(20).to_bool() {} else { panic!(err::TEST_FAILED) }
 }//}}}
 
 #[test]
@@ -442,22 +440,22 @@ fn float_t0()
 {//{{{
     match Var::float(1.236).data() {
         &Data::Float(value) => { assert_eq!(value,1.236); }
-        _ => panic!(ERROR_TEST_FAILED)
+        _ => panic!(err::TEST_FAILED)
     }
 
     match Var::float(1256.2).data() {
         &Data::Float(value) => { assert_eq!(value,1256.2); }
-        _ => panic!(ERROR_TEST_FAILED)
+        _ => panic!(err::TEST_FAILED)
     }
 
     match Var::float(-325.2).data() {
         &Data::Float(value) => { assert_eq!(value,-325.2); }
-        _ => panic!(ERROR_TEST_FAILED)
+        _ => panic!(err::TEST_FAILED)
     }
 
     assert_eq!(Var::float(1.234).to_float(),Ok(1.234));
     assert_eq!(Var::float(-325.2).to_float(),Ok(-325.2));
-    if let Err(_) = Var::float(20.0).to_bool() {} else { panic!(ERROR_TEST_FAILED) }
+    if let Err(_) = Var::float(20.0).to_bool() {} else { panic!(err::TEST_FAILED) }
 }//}}}
 
 #[test]
@@ -465,12 +463,12 @@ fn string_t0()
 {//{{{
     match Var::str("Hello world").data() {
         &Data::String(ref value) => { assert_eq!(value,"Hello world"); }
-        _ => panic!(ERROR_TEST_FAILED)
+        _ => panic!(err::TEST_FAILED)
     }
 
     assert_eq!(Var::str("Hello world").to_str(),Ok(&String::from("Hello world")));
     assert_eq!(Var::str("Hello universe").to_str(),Ok(&String::from("Hello universe")));
-    if let Err(_) = Var::str("Hello world").to_bool() {} else { panic!(ERROR_TEST_FAILED) }
+    if let Err(_) = Var::str("Hello world").to_bool() {} else { panic!(err::TEST_FAILED) }
 }//}}}
 
 #[test]
@@ -486,7 +484,7 @@ fn array_t0()
 
     match array.data() {
         &Data::Array(_) => {}
-        _ => panic!(ERROR_TEST_FAILED)
+        _ => panic!(err::TEST_FAILED)
     };
 }//}}}
 

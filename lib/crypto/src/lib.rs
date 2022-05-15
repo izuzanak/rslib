@@ -2,17 +2,17 @@
 
 #[macro_use] extern crate err;
 
-static CRYPTO_INVALID_BASE16_DATA_SIZE:&str = "invalid base16 data size";
-static CRYPTO_DIGEST_INVALID_ALGORITHM_NAME:&str = "invalid name of digest algorithm";
-static CRYPTO_DIGEST_CREATE_INIT_ERROR:&str = "error while initializing message digest context";
-static CRYPTO_DIGEST_UPDATE_ERROR:&str = "error while updating message digest";
-static CRYPTO_DIGEST_VALUE_ERROR:&str = "error while retrieving message digest value";
-static CRYPTO_CIPHER_INVALID_ALGORITHM_NAME:&str = "invalid name of cipher algorithm";
-static CRYPTO_CIPHER_INVALID_KEY_LENGTH:&str = "invalid length of cipher key";
-static CRYPTO_CIPHER_INVALID_INIT_VECTOR_LENGTH:&str = "invalid length of cipher initialisation vector";
-static CRYPTO_CIPHER_NEW_INIT_ERROR:&str = "error while initializing cipher context";
-static CRYPTO_CIPHER_UPDATE_ERROR:&str = "error while updating cipher context";
-static CRYPTO_CIPHER_FINALIZE_ERROR:&str = "error while finalizing cipher context";
+const CRYPTO_INVALID_BASE16_DATA_SIZE:&str = "invalid base16 data size";
+const CRYPTO_DIGEST_INVALID_ALGORITHM_NAME:&str = "invalid name of digest algorithm";
+const CRYPTO_DIGEST_CREATE_INIT_ERROR:&str = "error while initializing message digest context";
+const CRYPTO_DIGEST_UPDATE_ERROR:&str = "error while updating message digest";
+const CRYPTO_DIGEST_VALUE_ERROR:&str = "error while retrieving message digest value";
+const CRYPTO_CIPHER_INVALID_ALGORITHM_NAME:&str = "invalid name of cipher algorithm";
+const CRYPTO_CIPHER_INVALID_KEY_LENGTH:&str = "invalid length of cipher key";
+const CRYPTO_CIPHER_INVALID_INIT_VECTOR_LENGTH:&str = "invalid length of cipher initialisation vector";
+const CRYPTO_CIPHER_NEW_INIT_ERROR:&str = "error while initializing cipher context";
+const CRYPTO_CIPHER_UPDATE_ERROR:&str = "error while updating cipher context";
+const CRYPTO_CIPHER_FINALIZE_ERROR:&str = "error while finalizing cipher context";
 
 const OPENSSL_INIT_LOAD_CRYPTO_STRINGS:u64 = 0x02;
 const OPENSSL_INIT_ADD_ALL_CIPHERS    :u64 = 0x04;
@@ -104,12 +104,12 @@ pub fn init()
     }
 }//}}}
 
-pub fn random(a_size:usize) -> Vec<u8>
+pub fn random(size:usize) -> Vec<u8>
 {//{{{
-    let mut result = vec![0u8;a_size];
+    let mut result = vec![0u8;size];
 
     unsafe {
-        RAND_bytes(result.as_mut_ptr(),a_size as c_int);
+        RAND_bytes(result.as_mut_ptr(),size as c_int);
     }
 
     result
@@ -139,11 +139,11 @@ pub struct Decrypt {
 }
 
 impl Base16 {
-    pub fn encode(a_data:&[u8]) -> Vec<u8>
+    pub fn encode(data:&[u8]) -> Vec<u8>
     {//{{{
-        let mut result:Vec<u8> = Vec::with_capacity(a_data.len() << 1);
+        let mut result:Vec<u8> = Vec::with_capacity(data.len() << 1);
 
-        for byte in a_data {
+        for byte in data {
             result.push(BASE16_MAP[(byte >> 4) as usize]);
             result.push(BASE16_MAP[(byte & 0x0f) as usize]);
         }
@@ -151,19 +151,19 @@ impl Base16 {
         result
     }//}}}
 
-    pub fn decode(a_data:&[u8]) -> Result<Vec<u8>,err::Error>
+    pub fn decode(data:&[u8]) -> Result<Vec<u8>,err::Error>
     {//{{{
-        if a_data.len() & 0x01 != 0 {
+        if data.len() & 0x01 != 0 {
             return err!(CRYPTO_INVALID_BASE16_DATA_SIZE);
         }
 
-        let mut result:Vec<u8> = Vec::with_capacity(a_data.len() >> 1);
+        let mut result:Vec<u8> = Vec::with_capacity(data.len() >> 1);
 
         let mut ch_idx = 0;
-        while ch_idx < a_data.len() {
+        while ch_idx < data.len() {
             let mut ch;
 
-            let first = a_data[ch_idx];
+            let first = data[ch_idx];
             match first {
                 48 ..=  57 => ch = first - 48,
                 97 ..= 102 => ch = 10 + (first - 97),
@@ -173,7 +173,7 @@ impl Base16 {
 
             ch <<= 4;
 
-            let second = a_data[ch_idx + 1];
+            let second = data[ch_idx + 1];
             match second {
                 48 ..=  57 => ch += second - 48,
                 97 ..= 102 => ch += 10 + (second - 97),
@@ -191,24 +191,24 @@ impl Base16 {
 }
 
 impl Base64 {
-    pub fn encode(a_data:&[u8]) -> Vec<u8>
+    pub fn encode(data:&[u8]) -> Vec<u8>
     {//{{{
-        let mut result = vec![0u8;((a_data.len()/3 + 1) << 2) + 1];
+        let mut result = vec![0u8;((data.len()/3 + 1) << 2) + 1];
 
         unsafe {
-            let length = EVP_EncodeBlock(result.as_mut_ptr(),a_data.as_ptr(),a_data.len() as c_int);
+            let length = EVP_EncodeBlock(result.as_mut_ptr(),data.as_ptr(),data.len() as c_int);
             result.truncate(length as usize);
         }
 
         result
     }//}}}
 
-    pub fn decode(a_data:&[u8]) -> Vec<u8>
+    pub fn decode(data:&[u8]) -> Vec<u8>
     {//{{{
-        let mut result = vec![0u8;((a_data.len() >> 2) * 3) + 1];
+        let mut result = vec![0u8;((data.len() >> 2) * 3) + 1];
 
         unsafe {
-            let length = EVP_DecodeBlock(result.as_mut_ptr(),a_data.as_ptr(),a_data.len() as c_int);
+            let length = EVP_DecodeBlock(result.as_mut_ptr(),data.as_ptr(),data.len() as c_int);
             result.truncate(length as usize);
         }
 
@@ -217,14 +217,14 @@ impl Base64 {
 }
 
 impl DigestInfo {
-    pub fn by_name(a_name:&str) -> Result<DigestInfo,err::Error>
+    pub fn by_name(name:&str) -> Result<DigestInfo,err::Error>
     {//{{{
-        if a_name.as_bytes().last() != Some(&0u8) {
+        if name.as_bytes().last() != Some(&0u8) {
             return err!(err::CSTRING_MISSING_TERMINATING_ZERO);
         }
 
         unsafe {
-            let mdt = EVP_get_digestbyname(std::ffi::CStr::from_bytes_with_nul_unchecked(a_name.as_bytes()).as_ptr());
+            let mdt = EVP_get_digestbyname(std::ffi::CStr::from_bytes_with_nul_unchecked(name.as_bytes()).as_ptr());
 
             if mdt.is_null() {
                 err!(CRYPTO_DIGEST_INVALID_ALGORITHM_NAME)
@@ -249,7 +249,7 @@ impl DigestInfo {
 }
 
 impl Digest {
-    pub fn from_info(a_info:&DigestInfo) -> Result<Digest,err::Error>
+    pub fn from_info(info:&DigestInfo) -> Result<Digest,err::Error>
     {//{{{
         unsafe {
             let ctx = EVP_MD_CTX_new();
@@ -260,7 +260,7 @@ impl Digest {
 
             let digest = Digest{ctx:ctx};
 
-            if EVP_DigestInit_ex(digest.ctx,a_info.mdt,0 as *mut ENGINE) != 1 {
+            if EVP_DigestInit_ex(digest.ctx,info.mdt,0 as *mut ENGINE) != 1 {
                 return err!(CRYPTO_DIGEST_CREATE_INIT_ERROR);
             }
 
@@ -268,10 +268,10 @@ impl Digest {
         }
     }//}}}
 
-    pub fn update(&mut self,a_data:&[u8]) -> Result<(),err::Error>
+    pub fn update(&mut self,data:&[u8]) -> Result<(),err::Error>
     {//{{{
         unsafe {
-            match EVP_DigestUpdate(self.ctx,a_data.as_ptr(),a_data.len()) {
+            match EVP_DigestUpdate(self.ctx,data.as_ptr(),data.len()) {
                 1 => Ok(()),
                 _ => err!(CRYPTO_DIGEST_UPDATE_ERROR)
             }
@@ -320,14 +320,14 @@ impl Drop for Digest {
 }
 
 impl CipherInfo {
-    pub fn by_name(a_name:&str) -> Result<CipherInfo,err::Error>
+    pub fn by_name(name:&str) -> Result<CipherInfo,err::Error>
     {//{{{
-        if a_name.as_bytes().last() != Some(&0u8) {
+        if name.as_bytes().last() != Some(&0u8) {
             return err!(err::CSTRING_MISSING_TERMINATING_ZERO);
         }
 
         unsafe {
-            let ct = EVP_get_cipherbyname(std::ffi::CStr::from_bytes_with_nul_unchecked(a_name.as_bytes()).as_ptr());
+            let ct = EVP_get_cipherbyname(std::ffi::CStr::from_bytes_with_nul_unchecked(name.as_bytes()).as_ptr());
 
             if ct.is_null() {
                 err!(CRYPTO_CIPHER_INVALID_ALGORITHM_NAME)
@@ -360,14 +360,14 @@ impl CipherInfo {
         unsafe { EVP_CIPHER_iv_length(self.ct) as usize }
     }//}}}
 
-    pub fn check_key_iv(&self,a_key:&[u8],a_iv:&[u8]) -> Result<(),err::Error>
+    pub fn check_key_iv(&self,key:&[u8],iv:&[u8]) -> Result<(),err::Error>
     {//{{{
         unsafe {
-            if a_key.len() != EVP_CIPHER_key_length(self.ct) as usize {
+            if key.len() != EVP_CIPHER_key_length(self.ct) as usize {
                 return err!(CRYPTO_CIPHER_INVALID_KEY_LENGTH);
             }
 
-            if a_iv.len() != EVP_CIPHER_iv_length(self.ct) as usize {
+            if iv.len() != EVP_CIPHER_iv_length(self.ct) as usize {
                 return err!(CRYPTO_CIPHER_INVALID_INIT_VECTOR_LENGTH);
             }
         }
@@ -375,23 +375,23 @@ impl CipherInfo {
         Ok(())
     }//}}}
 
-    pub fn encrypt(&self,a_key:&[u8],a_iv:&[u8]) -> Result<Encrypt,err::Error>
+    pub fn encrypt(&self,key:&[u8],iv:&[u8]) -> Result<Encrypt,err::Error>
     {//{{{
-        Encrypt::from_info(self,a_key,a_iv)
+        Encrypt::from_info(self,key,iv)
     }//}}}
 
-    pub fn decrypt(&self,a_key:&[u8],a_iv:&[u8]) -> Result<Decrypt,err::Error>
+    pub fn decrypt(&self,key:&[u8],iv:&[u8]) -> Result<Decrypt,err::Error>
     {//{{{
-        Decrypt::from_info(self,a_key,a_iv)
+        Decrypt::from_info(self,key,iv)
     }//}}}
 }
 
 macro_rules! cipher_from_info {
     ($struct:tt,$init:tt) => {
-        pub fn from_info(a_info:&CipherInfo,a_key:&[u8],a_iv:&[u8]) -> Result<$struct,err::Error>
+        pub fn from_info(info:&CipherInfo,key:&[u8],iv:&[u8]) -> Result<$struct,err::Error>
         {//{{{
             unsafe {
-                match a_info.check_key_iv(a_key,a_iv) {
+                match info.check_key_iv(key,iv) {
                     Err(err) => return Err(err),
                     Ok(()) => {}
                 }
@@ -404,7 +404,7 @@ macro_rules! cipher_from_info {
 
                 let cipher = $struct{ctx:ctx};
 
-                if $init(cipher.ctx,a_info.ct,0 as *mut ENGINE,a_key.as_ptr(),a_iv.as_ptr()) != 1 {
+                if $init(cipher.ctx,info.ct,0 as *mut ENGINE,key.as_ptr(),iv.as_ptr()) != 1 {
                     return err!(CRYPTO_CIPHER_NEW_INIT_ERROR);
                 }
 
@@ -416,16 +416,16 @@ macro_rules! cipher_from_info {
 
 macro_rules! cipher_update {
     ($update:tt) => {
-        pub fn update(&mut self,a_data:&[u8]) -> Result<Vec<u8>,err::Error>
+        pub fn update(&mut self,data:&[u8]) -> Result<Vec<u8>,err::Error>
         {//{{{
             unsafe {
-                let data_length = a_data.len();
+                let data_length = data.len();
                 let block_size = EVP_CIPHER_CTX_block_size(self.ctx) as usize;
 
                 let mut result = vec![0;data_length + (block_size - data_length % block_size)];
 
                 let mut length:c_int = 0;
-                if $update(self.ctx,result.as_mut_ptr(),&mut length as *mut c_int,a_data.as_ptr(),a_data.len() as c_int) != 1 {
+                if $update(self.ctx,result.as_mut_ptr(),&mut length as *mut c_int,data.as_ptr(),data.len() as c_int) != 1 {
                     return err!(CRYPTO_CIPHER_UPDATE_ERROR);
                 }
 
@@ -508,8 +508,6 @@ impl Drop for Decrypt {
 mod tests {
 use super::*;
 
-static ERROR_TEST_FAILED:&str = "Test failed";
-
 #[test]
 fn init_t0()
 {//{{{
@@ -571,16 +569,16 @@ fn digest_t0()
 {//{{{
     init();
 
-    match DigestInfo::by_name("") { Err(err) => { assert_eq!(err.descr,err::CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(ERROR_TEST_FAILED) }
-    match DigestInfo::by_name("sha256") { Err(err) => { assert_eq!(err.descr,err::CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(ERROR_TEST_FAILED) }
-    match DigestInfo::by_name("sha255\0") { Err(err) => { assert_eq!(err.descr,CRYPTO_DIGEST_INVALID_ALGORITHM_NAME) } _ => panic!(ERROR_TEST_FAILED) }
-    match DigestInfo::by_name("sha256\0") { Ok(_) => {} _ => panic!(ERROR_TEST_FAILED) }
+    match DigestInfo::by_name("") { Err(err) => { assert_eq!(err.descr,err::CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(err::TEST_FAILED) }
+    match DigestInfo::by_name("sha256") { Err(err) => { assert_eq!(err.descr,err::CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(err::TEST_FAILED) }
+    match DigestInfo::by_name("sha255\0") { Err(err) => { assert_eq!(err.descr,CRYPTO_DIGEST_INVALID_ALGORITHM_NAME) } _ => panic!(err::TEST_FAILED) }
+    match DigestInfo::by_name("sha256\0") { Ok(_) => {} _ => panic!(err::TEST_FAILED) }
 
     let digest_info = DigestInfo::by_name("sha256\0").unwrap();
     assert_eq!(digest_info.name(),"SHA256");
 
-    match Digest::from_info(&digest_info) { Ok(Digest{ctx:_}) => {} _ => panic!(ERROR_TEST_FAILED) }
-    match digest_info.digest() { Ok(Digest{ctx:_}) => {} _ => panic!(ERROR_TEST_FAILED) }
+    match Digest::from_info(&digest_info) { Ok(Digest{ctx:_}) => {} _ => panic!(err::TEST_FAILED) }
+    match digest_info.digest() { Ok(Digest{ctx:_}) => {} _ => panic!(err::TEST_FAILED) }
 
     let mut digest = digest_info.digest().unwrap();
     digest.update("Hello world!".as_bytes()).unwrap();
@@ -593,10 +591,10 @@ fn encrypt_t0()
 {//{{{
     init();
 
-    match CipherInfo::by_name("") { Err(err) => { assert_eq!(err.descr,err::CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(ERROR_TEST_FAILED) }
-    match CipherInfo::by_name("AES-256-CBC") { Err(err) => { assert_eq!(err.descr,err::CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(ERROR_TEST_FAILED) }
-    match CipherInfo::by_name("AES-256-CBB\0") { Err(err) => { assert_eq!(err.descr,CRYPTO_CIPHER_INVALID_ALGORITHM_NAME) } _ => panic!(ERROR_TEST_FAILED) }
-    match CipherInfo::by_name("AES-256-CBC\0") { Ok(_) => {} _ => panic!(ERROR_TEST_FAILED) }
+    match CipherInfo::by_name("") { Err(err) => { assert_eq!(err.descr,err::CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(err::TEST_FAILED) }
+    match CipherInfo::by_name("AES-256-CBC") { Err(err) => { assert_eq!(err.descr,err::CSTRING_MISSING_TERMINATING_ZERO) } _ => panic!(err::TEST_FAILED) }
+    match CipherInfo::by_name("AES-256-CBB\0") { Err(err) => { assert_eq!(err.descr,CRYPTO_CIPHER_INVALID_ALGORITHM_NAME) } _ => panic!(err::TEST_FAILED) }
+    match CipherInfo::by_name("AES-256-CBC\0") { Ok(_) => {} _ => panic!(err::TEST_FAILED) }
 
     let cipher_info = CipherInfo::by_name("AES-256-CBC\0").unwrap();
 
@@ -608,8 +606,8 @@ fn encrypt_t0()
     let key = random(cipher_info.key_length());
     let iv = random(cipher_info.iv_length());
 
-    match Encrypt::from_info(&cipher_info,key.as_slice(),iv.as_slice()) { Ok(Encrypt{ctx:_}) => {} _ => panic!(ERROR_TEST_FAILED) }
-    match cipher_info.encrypt(key.as_slice(),iv.as_slice()) { Ok(Encrypt{ctx:_}) => {} _ => panic!(ERROR_TEST_FAILED) }
+    match Encrypt::from_info(&cipher_info,key.as_slice(),iv.as_slice()) { Ok(Encrypt{ctx:_}) => {} _ => panic!(err::TEST_FAILED) }
+    match cipher_info.encrypt(key.as_slice(),iv.as_slice()) { Ok(Encrypt{ctx:_}) => {} _ => panic!(err::TEST_FAILED) }
 
     let mut encrypt = cipher_info.encrypt(key.as_slice(),iv.as_slice()).unwrap();
     let mut encrypted_lst:Vec<Vec<u8>> = vec![];

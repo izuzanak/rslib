@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
-pub static CSTRING_MISSING_TERMINATING_ZERO:&str = "missing terminating zero of C string";
+pub const CSTRING_MISSING_TERMINATING_ZERO:&str = "missing terminating zero of C string";
+pub const TEST_FAILED:&str = "test failed";
 
 #[derive(Debug)]
 pub struct Error {
@@ -30,9 +31,10 @@ impl std::error::Error for Error {
 }
 
 impl PartialEq for Error {
-    fn eq(&self,other:&Self) -> bool {
+    fn eq(&self,other:&Self) -> bool 
+    {//{{{
         self.descr.eq(other.descr)
-    }
+    }//}}}
 }
 
 impl std::fmt::Display for Error {
@@ -46,8 +48,6 @@ impl std::fmt::Display for Error {
 mod tests {
 use super::*;
 
-static ERROR_TEST_FAILED:&str = "Test failed";
-
 fn error_test() -> Result<(),Error>
 {//{{{
     return err!("error 0");
@@ -58,7 +58,7 @@ fn dummy_0()
 {//{{{
     match error_test() {
         Err(Error{descr:"error 0"}) => {},
-        _ => panic!(ERROR_TEST_FAILED)
+        _ => panic!(err::TEST_FAILED)
     }
 }//}}}
 

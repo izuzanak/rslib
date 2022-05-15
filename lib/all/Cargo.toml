@@ -1,0 +1,14 @@
+[package]
+name = "all"
+version = "0.1.0"
+authors = ["Jiří Zuzaňák <zuzanakjiri@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+err    = { path = "../err" }
+var    = { path = "../var" }
+json   = { path = "../json" }
+crypto = { path = "../crypto" }
+linux  = { path = "../linux" }
+list   = { path = "../list" }
+sys    = { path = "../sys" }

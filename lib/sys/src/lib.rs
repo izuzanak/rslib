@@ -3,17 +3,17 @@
 extern crate libc;
 #[macro_use] extern crate err;
 
-static SYSTEM_MISSING_PROGRAM_NAME:&str = "missing name of program to execute";
-static SYSTEM_CANNOT_CREATE_NEW_PROCESS:&str = "cannot create new process";
-static CLOCK_CANNOT_GET_TIME:&str = "cannot get clock time";
+const SYSTEM_MISSING_PROGRAM_NAME:&str = "missing name of program to execute";
+const SYSTEM_CANNOT_CREATE_NEW_PROCESS:&str = "cannot create new process";
+const CLOCK_CANNOT_GET_TIME:&str = "cannot get clock time";
 
-fn execute(a_args:Vec<&str>) -> Result<libc::pid_t,err::Error>
+fn execute(args:Vec<&str>) -> Result<libc::pid_t,err::Error>
 {//{{{
-    if a_args.is_empty() {
+    if args.is_empty() {
         return err!(SYSTEM_MISSING_PROGRAM_NAME);
     }
 
-    for arg in &a_args {
+    for arg in &args {
         if arg.as_bytes().last() != Some(&0u8) {
             return err!(err::CSTRING_MISSING_TERMINATING_ZERO);
         }
@@ -30,7 +30,7 @@ fn execute(a_args:Vec<&str>) -> Result<libc::pid_t,err::Error>
             let mut arguments:Vec<*const i8> = vec![];
 
             // - initialize argument list -
-            for arg in &a_args {
+            for arg in &args {
                 arguments.push(arg.as_ptr() as *const i8);
             }
 
@@ -38,7 +38,7 @@ fn execute(a_args:Vec<&str>) -> Result<libc::pid_t,err::Error>
             arguments.push(0 as *const i8);
 
             // - execute target process -
-            if libc::execvp(a_args[0].as_ptr() as *const _,arguments.as_ptr() as *const _) == -1 {
+            if libc::execvp(args[0].as_ptr() as *const _,arguments.as_ptr() as *const _) == -1 {
                 libc::exit(0);
             }
         }
@@ -69,8 +69,6 @@ impl Clock {
 #[cfg(test)]
 mod tests {
 use super::*;
-
-static ERROR_TEST_FAILED:&str = "Test failed";
 
 #[test]
 fn execute_t0()

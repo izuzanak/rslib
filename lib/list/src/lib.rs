@@ -28,18 +28,18 @@ impl<T:std::cmp::PartialEq> List<T> {
         }
     }//}}}
 
-    pub fn new_init(a_src:Vec<T>) -> List<T>
+    pub fn new_init(src:Vec<T>) -> List<T>
     {//{{{
         let mut data:Vec<ListElement<T>> = vec![];
 
-        if a_src.is_empty() {
+        if src.is_empty() {
             List::<T>::new()
         }
         else {
-            let count = a_src.len();
+            let count = src.len();
             let mut prev_idx = IDX_NOT_EXIST;
 
-            for value in a_src {
+            for value in src {
                 let idx = data.len();
 
                 data.push(ListElement{
@@ -68,7 +68,7 @@ impl<T:std::cmp::PartialEq> List<T> {
         self.count
     }
 
-    pub fn prepend(&mut self,a_value:T) -> usize
+    pub fn prepend(&mut self,value:T) -> usize
     {//{{{
         let new_idx:usize;
 
@@ -79,7 +79,7 @@ impl<T:std::cmp::PartialEq> List<T> {
             self.data[new_idx] = ListElement{
                 next_idx:self.first_idx,
                 prev_idx:IDX_NOT_EXIST,
-                value:a_value,
+                value:value,
             }
         }
         else {
@@ -87,7 +87,7 @@ impl<T:std::cmp::PartialEq> List<T> {
             self.data.push(ListElement{
                 next_idx:self.first_idx,
                 prev_idx:IDX_NOT_EXIST,
-                value:a_value,
+                value:value,
             });
         }
 
@@ -97,7 +97,7 @@ impl<T:std::cmp::PartialEq> List<T> {
         new_idx
     }//}}}
 
-    pub fn append(&mut self,a_value:T) -> usize
+    pub fn append(&mut self,value:T) -> usize
     {//{{{
         let new_idx:usize;
 
@@ -108,7 +108,7 @@ impl<T:std::cmp::PartialEq> List<T> {
             self.data[new_idx] = ListElement{
                 next_idx:IDX_NOT_EXIST,
                 prev_idx:self.last_idx,
-                value:a_value,
+                value:value,
             }
         }
         else {
@@ -116,7 +116,7 @@ impl<T:std::cmp::PartialEq> List<T> {
             self.data.push(ListElement{
                 next_idx:IDX_NOT_EXIST,
                 prev_idx:self.last_idx,
-                value:a_value,
+                value:value,
             });
         }
 
@@ -133,12 +133,12 @@ impl<T:std::cmp::PartialEq> List<T> {
         new_idx
     }//}}}
 
-    pub fn remove(&mut self,a_idx:usize) -> &mut List<T>
+    pub fn remove(&mut self,idx:usize) -> &mut List<T>
     {//{{{
-        debug_assert!(a_idx < self.data.len());
+        debug_assert!(idx < self.data.len());
 
-        let rm_next_idx = self.data[a_idx].next_idx;
-        let rm_prev_idx = self.data[a_idx].prev_idx;
+        let rm_next_idx = self.data[idx].next_idx;
+        let rm_prev_idx = self.data[idx].prev_idx;
 
         if rm_next_idx != IDX_NOT_EXIST {
             self.data[rm_next_idx].prev_idx = rm_prev_idx;
@@ -154,19 +154,19 @@ impl<T:std::cmp::PartialEq> List<T> {
             self.first_idx = rm_next_idx;
         }
 
-        self.data[a_idx].next_idx = self.free_idx;
-        self.free_idx = a_idx;
+        self.data[idx].next_idx = self.free_idx;
+        self.free_idx = idx;
         self.count -= 1;
 
         self
     }//}}}
 
-    pub fn get_idx(&self,a_value:T) -> usize
+    pub fn get_idx(&self,value:T) -> usize
     {//{{{
         let mut idx = self.first_idx;
         while idx != IDX_NOT_EXIST {
             let element = &self.data[idx];
-            if element.value == a_value {
+            if element.value == value {
                 return idx
             }
 
@@ -194,8 +194,6 @@ impl<T:std::fmt::Display> std::fmt::Display for List<T> {
 #[cfg(test)]
 mod tests {
 use super::*;
-
-static ERROR_TEST_FAILED:&str = "Test failed";
 
 #[test]
 fn create_t0()

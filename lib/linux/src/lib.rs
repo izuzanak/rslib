@@ -25,15 +25,15 @@ pub struct Fd {
 }
 
 impl Fd {
-    pub fn take(a_fd:c_int) -> Fd {
-        Fd{fd:a_fd}
+    pub fn take(fd:c_int) -> Fd {
+        Fd{fd:fd}
     }
 
-    pub fn dup(a_fd:c_int) -> Result<Fd,err::Error>
+    pub fn dup(fd:c_int) -> Result<Fd,err::Error>
     {//{{{
         let new_fd;
         unsafe {
-            new_fd = dup(a_fd);
+            new_fd = dup(fd);
         }
         if new_fd == -1 {
             return err!(FD_DUP_ERROR);
@@ -42,18 +42,18 @@ impl Fd {
         Ok(Fd{fd:new_fd})
     }//}}}
 
-    pub fn write(&self,a_src:&[u8]) -> Result<(),err::Error>
+    pub fn write(&self,src:&[u8]) -> Result<(),err::Error>
     {//{{{
         debug_assert!(self.fd != -1);
 
-        if !a_src.is_empty() {
-            let size = a_src.len() as isize;
+        if !src.is_empty() {
+            let size = src.len() as isize;
             let mut writed:isize = 0;
 
             while writed < size {
                 let read_cnt;
                 unsafe {
-                    read_cnt = write(self.fd,a_src.as_ptr().offset(writed),(size - writed) as usize);
+                    read_cnt = write(self.fd,src.as_ptr().offset(writed),(size - writed) as usize);
                     if read_cnt == -1 {
                         return err!(FD_WRITE_ERROR);
                     }
@@ -65,21 +65,21 @@ impl Fd {
         Ok({})
     }//}}}
 
-    pub fn read(&self,a_trg:&mut Vec<u8>) -> Result<(),err::Error>
+    pub fn read(&self,trg:&mut Vec<u8>) -> Result<(),err::Error>
     {//{{{
         debug_assert!(self.fd != -1);
 
         let mut inq_cnt:c_int = 0;
         loop {
-            a_trg.reserve(READ_BUFFER_ADD);
+            trg.reserve(READ_BUFFER_ADD);
 
             unsafe {
-                let read_cnt = read(self.fd,a_trg.as_mut_ptr().offset(a_trg.len() as isize),READ_BUFFER_ADD);
+                let read_cnt = read(self.fd,trg.as_mut_ptr().offset(trg.len() as isize),READ_BUFFER_ADD);
                 if read_cnt == -1 {
                     return err!(FD_READ_ERROR);
                 }
 
-                a_trg.set_len(a_trg.len() + read_cnt as usize);
+                trg.set_len(trg.len() + read_cnt as usize);
 
                 let res = ioctl(self.fd,libc::TIOCINQ,&mut inq_cnt as *mut c_int);
                 if res == -1 {
@@ -114,7 +114,7 @@ impl std::fmt::Display for Fd {
     }//}}}
 }
 
-const ERROR_TEST_FAILED:&str = "Test failed";
+const TEST_FAILED:&str = "Test failed";
 
 #[cfg(test)]
 mod tests {

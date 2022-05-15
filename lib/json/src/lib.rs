@@ -7,11 +7,11 @@ use var::Var;
 use var::Data;
 use std::fmt::Write;
 
-static JSON_CREATE_UNSUPPORTED_VARIABLE_TYPE:&str = "json create, unsupported variable type";
-static JSON_CREATE_NO_STRING_DICT_KEY:&str = "json create, dictionary key must be string value";
-static JSON_PARSE_ERROR_UNRECOGNIZED_TERMINAL:&str = "json parse, unrecognized terminal symbol";
-static JSON_PARSE_ERROR_INVALID_SYNTAX:&str = "json parse, invalid json syntax";
-static JSON_PARSE_ERROR:&str = "json parse error";
+const JSON_CREATE_UNSUPPORTED_VARIABLE_TYPE:&str = "json create, unsupported variable type";
+const JSON_CREATE_NO_STRING_DICT_KEY:&str = "json create, dictionary key must be string value";
+const JSON_PARSE_ERROR_UNRECOGNIZED_TERMINAL:&str = "json parse, unrecognized terminal symbol";
+const JSON_PARSE_ERROR_INVALID_SYNTAX:&str = "json parse, invalid json syntax";
+const JSON_PARSE_ERROR:&str = "json parse error";
 
 // - parse constants -
 const IDX_NOT_EXIST:u32 = std::u32::MAX;
