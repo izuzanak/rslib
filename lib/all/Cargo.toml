@@ -5,10 +5,13 @@ authors = ["Jiří Zuzaňák <zuzanakjiri@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+rbtree = "0.1.5"
+
 err    = { path = "../err" }
 var    = { path = "../var" }
 json   = { path = "../json" }
 crypto = { path = "../crypto" }
 linux  = { path = "../linux" }
 list   = { path = "../list" }
+tree   = { path = "../tree" }
 sys    = { path = "../sys" }

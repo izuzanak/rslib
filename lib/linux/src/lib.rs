@@ -132,8 +132,6 @@ impl std::fmt::Display for Fd {
     }//}}}
 }
 
-const TEST_FAILED:&str = "Test failed";
-
 #[cfg(test)]
 mod tests {
 use super::*;
@@ -145,7 +143,7 @@ fn open_t0()
 
     let mut idx = 0;
     while idx < 10 {
-        fd.write(format!("Hello there, idx: {}\n",idx).as_str().as_bytes()).unwrap();
+        fd.write(format!("Hello there, idx: {}\n",idx).as_bytes()).unwrap();
         idx += 1;
     }
 
