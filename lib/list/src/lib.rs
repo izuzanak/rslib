@@ -109,7 +109,7 @@ impl<T> List<T>
 
     pub fn append(&mut self,value:T) -> u32
     {//{{{
-        let new_idx:u32;
+        let new_idx;
 
         if self.free_idx != IDX_NOT_EXIST {
             new_idx = self.free_idx;
@@ -138,6 +138,84 @@ impl<T> List<T>
         }
 
         self.last_idx = new_idx;
+        self.count += 1;
+
+        new_idx
+    }//}}}
+
+    pub fn insert_before(&mut self,idx:u32,value:T) -> u32
+    {//{{{
+        debug_assert!(idx < self.data.len() as u32);
+
+        let new_idx;
+        let idx_element_prev_idx = self.data[idx as usize].prev_idx;
+
+        if self.free_idx != IDX_NOT_EXIST {
+            new_idx = self.free_idx;
+            self.free_idx = self.data[new_idx as usize].next_idx;
+
+            self.data[new_idx as usize] = ListElement{
+                next_idx:idx,
+                prev_idx:idx_element_prev_idx,
+                value:value,
+            }
+        }
+        else {
+            new_idx = self.data.len() as u32;
+            self.data.push(ListElement{
+                next_idx:idx,
+                prev_idx:idx_element_prev_idx,
+                value:value,
+            });
+        }
+
+        if idx_element_prev_idx != IDX_NOT_EXIST {
+            self.data[idx_element_prev_idx as usize].next_idx = new_idx;
+        }
+        else {
+            self.first_idx = new_idx;
+        }
+
+        self.data[idx as usize].prev_idx = new_idx;
+        self.count += 1;
+
+        new_idx
+    }//}}}
+
+    pub fn insert_after(&mut self,idx:u32,value:T) -> u32
+    {//{{{
+        debug_assert!(idx < self.data.len() as u32);
+
+        let new_idx;
+        let idx_element_next_idx = self.data[idx as usize].next_idx;
+
+        if self.free_idx != IDX_NOT_EXIST {
+            new_idx = self.free_idx;
+            self.free_idx = self.data[new_idx as usize].next_idx;
+
+            self.data[new_idx as usize] = ListElement{
+                next_idx:idx_element_next_idx,
+                prev_idx:idx,
+                value:value,
+            };
+        }
+        else {
+            new_idx = self.data.len() as u32;
+            self.data.push(ListElement{
+                next_idx:idx_element_next_idx,
+                prev_idx:idx,
+                value:value,
+            });
+        }
+
+        if idx_element_next_idx != IDX_NOT_EXIST {
+            self.data[idx_element_next_idx as usize].prev_idx = new_idx;
+        }
+        else {
+            self.last_idx = new_idx;
+        }
+
+        self.data[idx as usize].next_idx = new_idx;
         self.count += 1;
 
         new_idx
@@ -180,7 +258,8 @@ impl<T> List<T>
     }//}}}
 }//}}}
 
-impl<T:std::cmp::PartialEq> List<T> {
+impl<T:std::cmp::PartialEq> List<T>
+{//{{{
     pub fn get_idx(&self,value:&T) -> u32
     {//{{{
         let mut idx = self.first_idx;
@@ -195,9 +274,78 @@ impl<T:std::cmp::PartialEq> List<T> {
 
         IDX_NOT_EXIST
     }//}}}
-}
+}//}}}
 
-impl<'a,T> Iterator for ListIter<'a,T> {
+impl<T:std::cmp::PartialEq> std::cmp::PartialEq for List<T>
+{//{{{
+    fn eq(&self,other:&Self) -> bool
+    {//{{{
+        if self.len() != other.len() {
+            return false;
+        }
+
+        let mut idx = self.first_idx;
+        let mut o_idx = other.first_idx;
+
+        while idx != IDX_NOT_EXIST {
+            let element = &self.data[idx as usize];
+            let o_element = &other.data[o_idx as usize];
+
+            if element.value != o_element.value {
+                return false;
+            }
+
+            idx = element.next_idx;
+            o_idx = o_element.next_idx;
+        }
+
+        debug_assert!(idx == o_idx);
+
+        true
+    }//}}}
+}//}}}
+
+impl<T:std::cmp::Eq> std::cmp::Eq for List<T> {}
+
+impl<T:std::cmp::Ord> std::cmp::PartialOrd for List<T>
+{//{{{
+    fn partial_cmp(&self,other:&Self) -> Option<std::cmp::Ordering>
+    {//{{{
+        Some(std::cmp::Ord::cmp(self,other))
+    }//}}}
+}//}}}
+
+impl<T:std::cmp::Ord> std::cmp::Ord for List<T>
+{//{{{
+    fn cmp(&self,other:&Self) -> std::cmp::Ordering
+    {//{{{
+        let mut idx = self.first_idx;
+        let mut o_idx = other.first_idx;
+
+        while idx != IDX_NOT_EXIST && o_idx != IDX_NOT_EXIST {
+            let element = &self.data[idx as usize];
+            let o_element = &other.data[o_idx as usize];
+
+            match std::cmp::Ord::cmp(&element.value,&o_element.value) {
+                std::cmp::Ordering::Equal => {},
+                result => return result,
+            }
+
+            idx = element.next_idx;
+            o_idx = o_element.next_idx;
+        }
+
+        match (idx,o_idx) {
+            (IDX_NOT_EXIST,IDX_NOT_EXIST) => std::cmp::Ordering::Equal,
+            (IDX_NOT_EXIST,_) => std::cmp::Ordering::Less,
+            (_,IDX_NOT_EXIST) => std::cmp::Ordering::Greater,
+            _ => panic!(),
+        }
+    }//}}}
+}//}}}
+
+impl<'a,T> Iterator for ListIter<'a,T>
+{//{{{
     type Item = &'a T;
     fn next(&mut self) -> Option<Self::Item>
     {//{{{
@@ -210,9 +358,10 @@ impl<'a,T> Iterator for ListIter<'a,T> {
             }
         }
     }//}}}
-}
+}//}}}
 
-impl<T:std::fmt::Display> std::fmt::Display for List<T> {
+impl<T:std::fmt::Display> std::fmt::Display for List<T>
+{//{{{
     fn fmt(&self,f:&mut std::fmt::Formatter) -> std::fmt::Result
     {//{{{
         write!(f,"[")?;
@@ -224,7 +373,22 @@ impl<T:std::fmt::Display> std::fmt::Display for List<T> {
 
         write!(f,"]")
     }//}}}
-}
+}//}}}
+
+impl<T:std::fmt::Debug> std::fmt::Debug for List<T>
+{//{{{
+    fn fmt(&self,f:&mut std::fmt::Formatter) -> std::fmt::Result
+    {//{{{
+        write!(f,"[")?;
+
+        let mut first = true;
+        for value in self.iter() {
+            write!(f,"{:?}{:?}",if first { first = false; ""} else { "," },*value)?;
+        }
+
+        write!(f,"]")
+    }//}}}
+}//}}}
 
 #[cfg(test)]
 mod tests {
@@ -260,6 +424,7 @@ fn prepend_t0()
     }
     assert_eq!(list.len(),5);
     assert_eq!(format!("{}",list),"[4,3,2,1,0]");
+    assert_eq!(list,List::<u32>::from(vec![4,3,2,1,0]));
 }//}}}
 
 #[test]
@@ -274,6 +439,37 @@ fn append_t0()
 
     assert_eq!(list.len(),5);
     assert_eq!(format!("{}",list),"[0,1,2,3,4]");
+    assert_eq!(list,List::<u32>::from(vec![0,1,2,3,4]));
+}//}}}
+
+#[test]
+fn insert_before_t0()
+{//{{{
+    let mut list = List::<u32>::from(vec![0,1,2,3,4,5]);
+    let mut idx:u32 = 0;
+    while idx < 5 {
+        list.insert_before(3,idx);
+        idx += 1
+    }
+
+    assert_eq!(list.len(),11);
+    assert_eq!(format!("{}",list),"[0,1,2,0,1,2,3,4,3,4,5]");
+    assert_eq!(list,List::<u32>::from(vec![0,1,2,0,1,2,3,4,3,4,5]));
+}//}}}
+
+#[test]
+fn insert_after_t0()
+{//{{{
+    let mut list = List::<u32>::from(vec![0,1,2,3,4,5]);
+    let mut idx:u32 = 0;
+    while idx < 5 {
+        list.insert_after(3,idx);
+        idx += 1
+    }
+
+    assert_eq!(list.len(),11);
+    assert_eq!(format!("{}",list),"[0,1,2,3,4,3,2,1,0,4,5]");
+    assert_eq!(list,List::<u32>::from(vec![0,1,2,3,4,3,2,1,0,4,5]));
 }//}}}
 
 #[test]
@@ -334,6 +530,38 @@ fn fmt_t0()
     let list = List::<u32>::from(vec![4,3,2,1,0]);
     assert_eq!(list.len(),5);
     assert_eq!(format!("{}",list),"[4,3,2,1,0]");
+}//}}}
+
+#[test]
+fn equal_t0()
+{//{{{
+    let list = List::<u32>::from(vec![0,1,2,3,4]);
+    let mut list1 = List::<u32>::new();
+
+    let mut vec = vec![];
+    let mut idx = 0;
+    while idx < 9 {
+        list1.append(idx);
+        idx += 1;
+        vec.push(list == list1);
+    }
+    assert_eq!(vec,vec![false,false,false,false,true,false,false,false,false]);
+}//}}}
+
+#[test]
+fn ord_t0()
+{//{{{
+    let list = List::<u32>::from(vec![0,1,2,3,4]);
+    let mut list1 = List::<u32>::new();
+
+    let mut vec = vec![];
+    let mut idx = 0;
+    while idx < 9 {
+        list1.append(idx);
+        vec.push(std::cmp::Ord::cmp(&list,&list1) as i8);
+        idx += 1;
+    }
+    assert_eq!(vec,vec![1,1,1,1,0,-1,-1,-1,-1]);
 }//}}}
 
 }

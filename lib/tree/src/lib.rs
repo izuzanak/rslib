@@ -814,6 +814,45 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
         good_idx
     }//}}}
 
+    pub fn get_idxs(&self,value:&T) -> Vec<u32>
+    {//{{{
+        let mut result:Vec<u32> = vec![];
+
+        if self.root_idx == IDX_NOT_EXIST {
+            return result;
+        }
+
+        let mut stack:Vec<u32> = vec![];
+        stack.push(self.root_idx);
+
+        while let Some(node_idx) = stack.pop() {
+            let node = &self.data[node_idx as usize];
+
+            let comp_result = std::cmp::Ord::cmp(value,&node.value);
+            if comp_result == std::cmp::Ordering::Less {
+                if node.left_idx != self.leaf_idx {
+                    stack.push(node.left_idx);
+                }
+            }
+            else
+            {
+                if comp_result == std::cmp::Ordering::Equal {
+                    result.push(node_idx);
+
+                    if node.left_idx != self.leaf_idx {
+                        stack.push(node.left_idx);
+                    }
+                }
+
+                if node.right_idx != self.leaf_idx {
+                    stack.push(node.right_idx);
+                }
+            }
+        }
+
+        result
+    }//}}}
+
     pub fn iter(&self) -> TreeIter<T>
     {//{{{
         let mut stack:Vec<u32> = vec![];
@@ -1027,6 +1066,16 @@ fn get_lee_idx_t0()
 
     let vec:Vec<u32> = (0u32..=12).into_iter().map(|x| tree.get_lee_idx(&x)).collect();
     assert_eq!(vec,vec![IDX_NOT_EXIST,6,6,5,5,4,4,4,3,3,2,2,1]);
+}//}}}
+
+#[test]
+fn get_idxs_t0()
+{//{{{
+    let tree = Tree::<u32>::from(vec![1,1,3,3,2,1,2,1,3,1,1,2,1,3,2,3,2,1,2,3,1,2,3,1,2,1,2,3,2,1,2,1,3,1]);
+    assert_eq!(tree.len(),34);
+    assert_eq!(tree.get_idxs(&1),vec![8,18,24,30,32,34,26,21,11,13,10,2,6,1]);
+    assert_eq!(tree.get_idxs(&2),vec![5,17,22,27,29,31,25,19,12,15,7]);
+    assert_eq!(tree.get_idxs(&3),vec![3,16,23,28,33,20,9,14,4]);
 }//}}}
 
 #[test]
