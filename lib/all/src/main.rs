@@ -53,13 +53,13 @@ fn tree_test_1()
         idx += 1;
     }
     
-    //let mut sum:u64 = 0;
-    //for value in &mut tree.iter() {
-    //    sum += *value as u64;
-    //    //println!("value: {}",value);
-    //}
+    let mut sum:u64 = 0;
+    for value in &mut tree.iter() {
+        sum += value.0 as u64;
+        //println!("value: {}",value);
+    }
 
-    //println!("sum: {}\n",sum)
+    println!("sum: {}\n",sum)
 }//}}}
 
 fn rust_vec_test()

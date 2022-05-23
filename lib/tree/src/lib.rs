@@ -3,7 +3,7 @@
 
 const IDX_NOT_EXIST:u32 = std::u32::MAX;
 
-struct TreeElement<T>
+struct TreeNode<T>
 {//{{{
     parent_idx:u32,
     left_idx:u32,
@@ -19,7 +19,7 @@ pub struct Tree<T>
     root_idx:u32,
     leaf_idx:u32,
     count:u32,
-    data:Vec<TreeElement<T>>,
+    data:Vec<TreeNode<T>>,
 }//}}}
 
 pub struct TreeIter<'a,T>
@@ -150,7 +150,7 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
         else {
             if self.leaf_idx == IDX_NOT_EXIST {
                 self.leaf_idx = self.data.len() as u32;
-                self.data.push(TreeElement{
+                self.data.push(TreeNode{
                     parent_idx:IDX_NOT_EXIST,
                     left_idx:  IDX_NOT_EXIST,
                     right_idx: IDX_NOT_EXIST,
@@ -161,7 +161,7 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
             }
 
             new_idx = self.data.len() as u32;
-            self.data.push(TreeElement{
+            self.data.push(TreeNode{
                 parent_idx:IDX_NOT_EXIST,
                 left_idx:  IDX_NOT_EXIST,
                 right_idx: IDX_NOT_EXIST,
@@ -871,22 +871,95 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
     }//}}}
 }//}}}
 
-impl<'a,T:std::default::Default + std::cmp::Ord> Iterator for TreeIter<'a,T> {
+impl<T:std::default::Default + std::cmp::Ord> std::cmp::PartialEq for Tree<T>
+{//{{{
+    fn eq(&self,other:&Self) -> bool
+    {//{{{
+        if self.len() != other.len() {
+            return false;
+        }
+
+        let mut stack:Vec<u32> = vec![];
+        let mut o_stack:Vec<u32> = vec![];
+
+        let mut idx = self.get_stack_min_value_idx(self.root_idx,&mut stack);
+        let mut o_idx = other.get_stack_min_value_idx(other.root_idx,&mut o_stack);
+
+        while idx != IDX_NOT_EXIST {
+            if self.data[idx as usize].value != other.data[o_idx as usize].value {
+                return false;
+            }
+
+            idx = self.get_stack_next_idx(idx,&mut stack);
+            o_idx = other.get_stack_next_idx(o_idx,&mut o_stack);
+        }
+
+        debug_assert!(o_idx == IDX_NOT_EXIST);
+
+        true
+    }//}}}
+}//}}}
+
+impl<T:std::default::Default + std::cmp::Ord> std::cmp::Eq for Tree<T> {}
+
+impl<T:std::default::Default + std::cmp::Ord> std::cmp::PartialOrd for Tree<T>
+{//{{{
+    fn partial_cmp(&self,other:&Self) -> Option<std::cmp::Ordering>
+    {//{{{
+        Some(std::cmp::Ord::cmp(self,other))
+    }//}}}
+}//}}}
+
+impl<T:std::default::Default + std::cmp::Ord> std::cmp::Ord for Tree<T>
+{//{{{
+    fn cmp(&self,other:&Self) -> std::cmp::Ordering
+    {//{{{
+        let mut stack:Vec<u32> = vec![];
+        let mut o_stack:Vec<u32> = vec![];
+
+        let mut idx = self.get_stack_min_value_idx(self.root_idx,&mut stack);
+        let mut o_idx = other.get_stack_min_value_idx(other.root_idx,&mut o_stack);
+
+        while idx != IDX_NOT_EXIST && o_idx != IDX_NOT_EXIST {
+            let node = &self.data[idx as usize];
+            let o_node = &other.data[o_idx as usize];
+
+            match std::cmp::Ord::cmp(&node.value,&o_node.value) {
+                std::cmp::Ordering::Equal => {},
+                result => return result,
+            }
+
+            idx = self.get_stack_next_idx(idx,&mut stack);
+            o_idx = other.get_stack_next_idx(o_idx,&mut o_stack);
+        }
+
+        match (idx,o_idx) {
+            (IDX_NOT_EXIST,IDX_NOT_EXIST) => std::cmp::Ordering::Equal,
+            (IDX_NOT_EXIST,_) => std::cmp::Ordering::Less,
+            (_,IDX_NOT_EXIST) => std::cmp::Ordering::Greater,
+            _ => panic!(),
+        }
+    }//}}}
+}//}}}
+
+impl<'a,T:std::default::Default + std::cmp::Ord> Iterator for TreeIter<'a,T>
+{//{{{
     type Item = &'a T;
     fn next(&mut self) -> Option<Self::Item>
     {//{{{
         match self.idx {
             IDX_NOT_EXIST => None,
             _ => {
-                let element = &self.tree.data[self.idx as usize];
+                let node = &self.tree.data[self.idx as usize];
                 self.idx = self.tree.get_stack_next_idx(self.idx,&mut self.stack);
-                Some(&element.value)
+                Some(&node.value)
             }
         }
     }//}}}
-}
+}//}}}
 
-impl<T:std::fmt::Display + std::default::Default + std::cmp::Ord> std::fmt::Display for Tree<T> {
+impl<T:std::fmt::Display + std::default::Default + std::cmp::Ord> std::fmt::Display for Tree<T>
+{//{{{
     fn fmt(&self,f:&mut std::fmt::Formatter) -> std::fmt::Result
     {//{{{
         write!(f,"[")?;
@@ -898,11 +971,121 @@ impl<T:std::fmt::Display + std::default::Default + std::cmp::Ord> std::fmt::Disp
 
         write!(f,"]")
     }//}}}
-}
+}//}}}
+
+impl<T:std::fmt::Debug + std::default::Default + std::cmp::Ord> std::fmt::Debug for Tree<T>
+{//{{{
+    fn fmt(&self,f:&mut std::fmt::Formatter) -> std::fmt::Result
+    {//{{{
+        write!(f,"[")?;
+
+        let mut first = true;
+        for value in self.iter() {
+            write!(f,"{:?}{:?}",if first { first = false; ""} else { "," },*value)?;
+        }
+
+        write!(f,"]")
+    }//}}}
+}//}}}
 
 #[cfg(test)]
 mod tests {
 use super::*;
+
+impl<T:std::default::Default + std::cmp::Ord> Tree<T>
+{//{{{
+    fn check_properties(&self) -> Result<(),&str>
+    {//{{{
+        let leaf = &self.data[self.leaf_idx as usize];
+        if !leaf.color {
+            return Err("ERROR: leaf_node color");
+        }
+
+        if leaf.left_idx != IDX_NOT_EXIST || leaf.right_idx != IDX_NOT_EXIST {
+            return Err("ERROR: leaf_node indexes");
+        }
+
+        if self.root_idx != IDX_NOT_EXIST {
+            // - check if root node is black -
+            let r_node = &self.data[self.root_idx as usize];
+            if !r_node.color {
+                return Err("ERROR: root node is not black");
+            }
+
+            // - create node index and path length stacks -
+            let mut ni_stack:Vec<u32> = vec![];
+            let mut pl_stack:Vec<u32> = vec![];
+
+            // - insert root on stack -
+            ni_stack.push(self.root_idx);
+            pl_stack.push(0);
+
+            let mut r_path_length = IDX_NOT_EXIST;
+            while let (Some(node_idx),Some(mut path_length)) = (ni_stack.pop(),pl_stack.pop()) {
+                let stack_depth = ni_stack.len();
+
+                let node = &self.data[node_idx as usize];
+
+                if node.color {
+                    path_length += 1;
+                }
+                else {
+                    if node.left_idx == IDX_NOT_EXIST || node.right_idx == IDX_NOT_EXIST {
+                        return Err("ERROR: red node has not two childs!");
+                    }
+
+                    if !self.data[node.left_idx as usize].color || !self.data[node.right_idx as usize].color {
+                        return Err("ERROR: child of red node is not black!");
+                    }
+                }
+
+                if node.left_idx != IDX_NOT_EXIST {
+                    ni_stack.push(node.left_idx);
+                    pl_stack.push(path_length);
+                }
+
+                if node.right_idx != IDX_NOT_EXIST {
+                    ni_stack.push(node.right_idx);
+                    pl_stack.push(path_length);
+                }
+
+                // - if node is leaf node -
+                if stack_depth == ni_stack.len() {
+                    if r_path_length != IDX_NOT_EXIST {
+                        if r_path_length != path_length {
+                            return Err("ERROR: all path have no same length!");
+                        }
+                    }
+                    else {
+                        r_path_length = path_length;
+                    }
+                }
+
+            }
+        }
+
+        // - test if are node values sorted -
+        if self.root_idx != IDX_NOT_EXIST {
+            let mut stack:Vec<u32> = vec![];
+
+            let mut idx = self.get_stack_min_value_idx(self.root_idx,&mut stack);
+            loop {
+                let l_idx = idx;
+                idx = self.get_stack_next_idx(idx,&mut stack);
+                if idx == IDX_NOT_EXIST {
+                    break;
+                }
+
+                match std::cmp::Ord::cmp(&self.data[l_idx as usize].value,&self.data[idx as usize].value) {
+                    std::cmp::Ordering::Greater => return Err("ERROR: values in rb_tree are not sorted"),
+                    _ => {}
+                }
+            }
+        }
+
+        Ok(())
+    }//}}}
+}//}}}
 
 #[test]
 fn get_stack_t0()
@@ -918,6 +1101,7 @@ fn get_stack_t0()
         idx = tree.get_stack_next_idx(idx,&mut stack);
     }
     assert_eq!(vec,vec![1,2,3,4,5]);
+    assert_eq!(tree.check_properties(),Ok(()));
 }//}}}
 
 #[test]
@@ -928,6 +1112,7 @@ fn get_min_value_idx_t0()
 
     let tree = Tree::<u32>::from(vec![5,4,3,2,1]);
     assert_eq!(tree.get_min_value_idx(tree.root_idx),5);
+    assert_eq!(tree.check_properties(),Ok(()));
 }//}}}
 
 #[test]
@@ -995,6 +1180,7 @@ fn insert_t0()
     }
     assert_eq!(tree.len(),5);
     assert_eq!(format!("{}",tree),"[0,1,2,3,4]");
+    assert_eq!(tree,Tree::<u32>::from(vec![0,1,2,3,4]));
 }//}}}
 
 #[test]
@@ -1008,6 +1194,7 @@ fn unique_insert_t0()
     }
     assert_eq!(tree.len(),5);
     assert_eq!(format!("{}",tree),"[0,1,2,3,4]");
+    assert_eq!(tree,Tree::<u32>::from(vec![0,1,2,3,4]));
 }//}}}
 
 #[test]
@@ -1021,6 +1208,7 @@ fn remove_t0()
     }
     assert_eq!(tree.len(),5);
     assert_eq!(format!("{}",tree),"[0,1,2,8,9]");
+    assert_eq!(tree,Tree::<u32>::from(vec![0,1,2,8,9]));
 }//}}}
 
 #[test]
@@ -1043,6 +1231,7 @@ fn get_left_idx_t0()
 {//{{{
     let tree = Tree::<u32>::from(vec![5,4,4,4,3,3,3,3,2,2,1]);
     assert_eq!(tree.len(),11);
+    assert_eq!(tree.check_properties(),Ok(()));
 
     let vec:Vec<u32> = (1u32..=5).into_iter().rev().map(|x| tree.get_left_idx(&x)).collect();
     assert_eq!(vec,vec![1,2,5,9,11]);
@@ -1053,6 +1242,7 @@ fn get_gre_idx_t0()
 {//{{{
     let tree = Tree::<u32>::from(vec![12,10,8,5,3,1]);
     assert_eq!(tree.len(),6);
+    assert_eq!(tree.check_properties(),Ok(()));
 
     let vec:Vec<u32> = (0u32..=13).into_iter().map(|x| tree.get_gre_idx(&x)).collect();
     assert_eq!(vec,vec![6,6,5,5,4,4,3,3,3,2,2,1,1,IDX_NOT_EXIST]);
@@ -1073,6 +1263,7 @@ fn get_idxs_t0()
 {//{{{
     let tree = Tree::<u32>::from(vec![1,1,3,3,2,1,2,1,3,1,1,2,1,3,2,3,2,1,2,3,1,2,3,1,2,1,2,3,2,1,2,1,3,1]);
     assert_eq!(tree.len(),34);
+    assert_eq!(tree.check_properties(),Ok(()));
     assert_eq!(tree.get_idxs(&1),vec![8,18,24,30,32,34,26,21,11,13,10,2,6,1]);
     assert_eq!(tree.get_idxs(&2),vec![5,17,22,27,29,31,25,19,12,15,7]);
     assert_eq!(tree.get_idxs(&3),vec![3,16,23,28,33,20,9,14,4]);
@@ -1095,6 +1286,38 @@ fn iter_t0()
         }
     }
     assert_eq!(vec,vec![5,4,3,2,1]);
+}//}}}
+
+#[test]
+fn equal_t0()
+{//{{{
+    let tree = Tree::<u32>::from(vec![0,1,2,3,4]);
+    let mut tree1 = Tree::<u32>::new();
+
+    let mut vec = vec![];
+    let mut idx = 0;
+    while idx < 9 {
+        tree1.insert(idx);
+        idx += 1;
+        vec.push(tree == tree1);
+    }
+    assert_eq!(vec,vec![false,false,false,false,true,false,false,false,false]);
+}//}}}
+
+#[test]
+fn ord_t0()
+{//{{{
+    let tree = Tree::<u32>::from(vec![0,1,2,3,4]);
+    let mut tree1 = Tree::<u32>::new();
+
+    let mut vec = vec![];
+    let mut idx = 0;
+    while idx < 9 {
+        tree1.insert(idx);
+        vec.push(std::cmp::Ord::cmp(&tree,&tree1) as i8);
+        idx += 1;
+    }
+    assert_eq!(vec,vec![1,1,1,1,0,-1,-1,-1,-1]);
 }//}}}
 
 }

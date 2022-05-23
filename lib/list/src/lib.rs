@@ -299,7 +299,7 @@ impl<T:std::cmp::PartialEq> std::cmp::PartialEq for List<T>
             o_idx = o_element.next_idx;
         }
 
-        debug_assert!(idx == o_idx);
+        debug_assert!(o_idx == IDX_NOT_EXIST);
 
         true
     }//}}}
