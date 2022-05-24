@@ -539,10 +539,8 @@ fn equal_t0()
     let mut list1 = List::<u32>::new();
 
     let mut vec = vec![];
-    let mut idx = 0;
-    while idx < 9 {
+    for idx in 0..9 {
         list1.append(idx);
-        idx += 1;
         vec.push(list == list1);
     }
     assert_eq!(vec,vec![false,false,false,false,true,false,false,false,false]);
@@ -555,11 +553,9 @@ fn ord_t0()
     let mut list1 = List::<u32>::new();
 
     let mut vec = vec![];
-    let mut idx = 0;
-    while idx < 9 {
+    for idx in 0..9 {
         list1.append(idx);
         vec.push(std::cmp::Ord::cmp(&list,&list1) as i8);
-        idx += 1;
     }
     assert_eq!(vec,vec![1,1,1,1,0,-1,-1,-1,-1]);
 }//}}}

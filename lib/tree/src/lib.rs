@@ -3,6 +3,13 @@
 
 const IDX_NOT_EXIST:u32 = std::u32::MAX;
 
+use std::os::raw::{c_int};
+
+extern
+{//{{{
+    fn rand() -> c_int;
+}//}}}
+
 struct TreeNode<T>
 {//{{{
     parent_idx:u32,
@@ -23,6 +30,12 @@ pub struct Tree<T>
 }//}}}
 
 pub struct TreeIter<'a,T>
+{//{{{
+    tree:&'a Tree<T>,
+    idx:u32,
+}//}}}
+
+pub struct TreeOrdIter<'a,T>
 {//{{{
     tree:&'a Tree<T>,
     stack:Vec<u32>,
@@ -855,6 +868,14 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
 
     pub fn iter(&self) -> TreeIter<T>
     {//{{{
+        TreeIter{
+            tree:&self,
+            idx:0,
+        }
+    }//}}}
+
+    pub fn ord_iter(&self) -> TreeOrdIter<T>
+    {//{{{
         let mut stack:Vec<u32> = vec![];
         let idx = if self.root_idx != IDX_NOT_EXIST {
             self.get_stack_min_value_idx(self.root_idx,&mut stack)
@@ -863,7 +884,7 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
             IDX_NOT_EXIST
         };
 
-        TreeIter{
+        TreeOrdIter{
             tree:&self,
             stack:stack,
             idx:idx,
@@ -942,7 +963,7 @@ impl<T:std::default::Default + std::cmp::Ord> std::cmp::Ord for Tree<T>
     }//}}}
 }//}}}
 
-impl<'a,T:std::default::Default + std::cmp::Ord> Iterator for TreeIter<'a,T>
+impl<'a,T:std::default::Default + std::cmp::Ord> Iterator for TreeOrdIter<'a,T>
 {//{{{
     type Item = &'a T;
     fn next(&mut self) -> Option<Self::Item>
@@ -958,6 +979,22 @@ impl<'a,T:std::default::Default + std::cmp::Ord> Iterator for TreeIter<'a,T>
     }//}}}
 }//}}}
 
+impl<'a,T:std::default::Default + std::cmp::Ord> Iterator for TreeIter<'a,T>
+{//{{{
+    type Item = &'a T;
+    fn next(&mut self) -> Option<Self::Item>
+    {//{{{
+        while let Some(ref node) = self.tree.data.get(self.idx as usize) {
+            self.idx += 1;
+            if node.valid {
+                return Some(&node.value);
+            }
+        }
+
+        None
+    }//}}}
+}//}}}
+
 impl<T:std::fmt::Display + std::default::Default + std::cmp::Ord> std::fmt::Display for Tree<T>
 {//{{{
     fn fmt(&self,f:&mut std::fmt::Formatter) -> std::fmt::Result
@@ -965,7 +1002,7 @@ impl<T:std::fmt::Display + std::default::Default + std::cmp::Ord> std::fmt::Disp
         write!(f,"[")?;
 
         let mut first = true;
-        for value in self.iter() {
+        for value in self.ord_iter() {
             write!(f,"{}{}",if first { first = false; ""} else { "," },*value)?;
         }
 
@@ -980,7 +1017,7 @@ impl<T:std::fmt::Debug + std::default::Default + std::cmp::Ord> std::fmt::Debug 
         write!(f,"[")?;
 
         let mut first = true;
-        for value in self.iter() {
+        for value in self.ord_iter() {
             write!(f,"{:?}{:?}",if first { first = false; ""} else { "," },*value)?;
         }
 
@@ -1173,10 +1210,8 @@ fn get_prev_idx_t0()
 fn insert_t0()
 {//{{{
     let mut tree = Tree::<u32>::new();
-    let mut idx:u32 = 0;
-    while idx < 5 {
+    for idx in 0..5 {
         tree.insert(idx);
-        idx += 1
     }
     assert_eq!(tree.len(),5);
     assert_eq!(format!("{}",tree),"[0,1,2,3,4]");
@@ -1187,10 +1222,8 @@ fn insert_t0()
 fn unique_insert_t0()
 {//{{{
     let mut tree = Tree::<u32>::new();
-    let mut idx:u32 = 0;
-    while idx < 20 {
+    for idx in 0..20 {
         tree.unique_insert(idx % 5);
-        idx += 1
     }
     assert_eq!(tree.len(),5);
     assert_eq!(format!("{}",tree),"[0,1,2,3,4]");
@@ -1201,10 +1234,8 @@ fn unique_insert_t0()
 fn remove_t0()
 {//{{{
     let mut tree = Tree::<u32>::from(vec![0,1,2,3,4,5,6,7,8,9]);
-    let mut idx:u32 = 4;
-    while idx < 9 {
+    for idx in 4..9 {
         tree.remove(idx);
-        idx += 1
     }
     assert_eq!(tree.len(),5);
     assert_eq!(format!("{}",tree),"[0,1,2,8,9]");
@@ -1273,18 +1304,10 @@ fn get_idxs_t0()
 fn iter_t0()
 {//{{{
     let tree = Tree::<u32>::from(vec![5,4,3,2,1]);
-    let mut vec = vec![];
-    for value in tree.iter() {
-        vec.push(*value);
-    }
+    let vec:Vec<u32> = tree.ord_iter().map(|x|*x).collect();
     assert_eq!(vec,vec![1,2,3,4,5]);
 
-    let mut vec = vec![];
-    for value in tree.data.iter() {
-        if value.valid {
-            vec.push(value.value);
-        }
-    }
+    let vec:Vec<u32> = tree.iter().map(|x|*x).collect();
     assert_eq!(vec,vec![5,4,3,2,1]);
 }//}}}
 
@@ -1295,10 +1318,8 @@ fn equal_t0()
     let mut tree1 = Tree::<u32>::new();
 
     let mut vec = vec![];
-    let mut idx = 0;
-    while idx < 9 {
+    for idx in 0..9 {
         tree1.insert(idx);
-        idx += 1;
         vec.push(tree == tree1);
     }
     assert_eq!(vec,vec![false,false,false,false,true,false,false,false,false]);
@@ -1311,13 +1332,21 @@ fn ord_t0()
     let mut tree1 = Tree::<u32>::new();
 
     let mut vec = vec![];
-    let mut idx = 0;
-    while idx < 9 {
+    for idx in 0..9 {
         tree1.insert(idx);
         vec.push(std::cmp::Ord::cmp(&tree,&tree1) as i8);
-        idx += 1;
     }
     assert_eq!(vec,vec![1,1,1,1,0,-1,-1,-1,-1]);
+}//}}}
+
+#[test]
+fn check_properties_t0()
+{//{{{
+    let mut tree = Tree::<u32>::new();
+    for _ in 0..100000 {
+        tree.insert(unsafe {rand()} as u32);
+    }
+    assert_eq!(tree.check_properties(),Ok(()));
 }//}}}
 
 }
