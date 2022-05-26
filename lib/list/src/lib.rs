@@ -1,5 +1,8 @@
 #![allow(dead_code)]
 
+use std::cmp::{PartialEq,Eq,PartialOrd,Ord,Ordering};
+use std::fmt::{Debug,Display,Formatter};
+
 const IDX_NOT_EXIST:u32 = std::u32::MAX;
 
 struct ListElement<T>
@@ -258,7 +261,7 @@ impl<T> List<T>
     }//}}}
 }//}}}
 
-impl<T:std::cmp::PartialEq> List<T>
+impl<T:PartialEq> List<T>
 {//{{{
     pub fn get_idx(&self,value:&T) -> u32
     {//{{{
@@ -276,7 +279,7 @@ impl<T:std::cmp::PartialEq> List<T>
     }//}}}
 }//}}}
 
-impl<T:std::cmp::PartialEq> std::cmp::PartialEq for List<T>
+impl<T:PartialEq> PartialEq for List<T>
 {//{{{
     fn eq(&self,other:&Self) -> bool
     {//{{{
@@ -305,19 +308,19 @@ impl<T:std::cmp::PartialEq> std::cmp::PartialEq for List<T>
     }//}}}
 }//}}}
 
-impl<T:std::cmp::Eq> std::cmp::Eq for List<T> {}
+impl<T:Eq> Eq for List<T> {}
 
-impl<T:std::cmp::Ord> std::cmp::PartialOrd for List<T>
+impl<T:Ord> PartialOrd for List<T>
 {//{{{
-    fn partial_cmp(&self,other:&Self) -> Option<std::cmp::Ordering>
+    fn partial_cmp(&self,other:&Self) -> Option<Ordering>
     {//{{{
-        Some(std::cmp::Ord::cmp(self,other))
+        Some(Ord::cmp(self,other))
     }//}}}
 }//}}}
 
-impl<T:std::cmp::Ord> std::cmp::Ord for List<T>
+impl<T:Ord> Ord for List<T>
 {//{{{
-    fn cmp(&self,other:&Self) -> std::cmp::Ordering
+    fn cmp(&self,other:&Self) -> Ordering
     {//{{{
         let mut idx = self.first_idx;
         let mut o_idx = other.first_idx;
@@ -326,8 +329,8 @@ impl<T:std::cmp::Ord> std::cmp::Ord for List<T>
             let element = &self.data[idx as usize];
             let o_element = &other.data[o_idx as usize];
 
-            match std::cmp::Ord::cmp(&element.value,&o_element.value) {
-                std::cmp::Ordering::Equal => {},
+            match Ord::cmp(&element.value,&o_element.value) {
+                Ordering::Equal => {},
                 result => return result,
             }
 
@@ -336,9 +339,9 @@ impl<T:std::cmp::Ord> std::cmp::Ord for List<T>
         }
 
         match (idx,o_idx) {
-            (IDX_NOT_EXIST,IDX_NOT_EXIST) => std::cmp::Ordering::Equal,
-            (IDX_NOT_EXIST,_) => std::cmp::Ordering::Less,
-            (_,IDX_NOT_EXIST) => std::cmp::Ordering::Greater,
+            (IDX_NOT_EXIST,IDX_NOT_EXIST) => Ordering::Equal,
+            (IDX_NOT_EXIST,_) => Ordering::Less,
+            (_,IDX_NOT_EXIST) => Ordering::Greater,
             _ => panic!(),
         }
     }//}}}
@@ -360,9 +363,9 @@ impl<'a,T> Iterator for ListIter<'a,T>
     }//}}}
 }//}}}
 
-impl<T:std::fmt::Display> std::fmt::Display for List<T>
+impl<T:Display> Display for List<T>
 {//{{{
-    fn fmt(&self,f:&mut std::fmt::Formatter) -> std::fmt::Result
+    fn fmt(&self,f:&mut Formatter) -> std::fmt::Result
     {//{{{
         write!(f,"[")?;
 
@@ -375,9 +378,9 @@ impl<T:std::fmt::Display> std::fmt::Display for List<T>
     }//}}}
 }//}}}
 
-impl<T:std::fmt::Debug> std::fmt::Debug for List<T>
+impl<T:Debug> Debug for List<T>
 {//{{{
-    fn fmt(&self,f:&mut std::fmt::Formatter) -> std::fmt::Result
+    fn fmt(&self,f:&mut Formatter) -> std::fmt::Result
     {//{{{
         write!(f,"[")?;
 
@@ -555,7 +558,7 @@ fn ord_t0()
     let mut vec = vec![];
     for idx in 0..9 {
         list1.append(idx);
-        vec.push(std::cmp::Ord::cmp(&list,&list1) as i8);
+        vec.push(Ord::cmp(&list,&list1) as i8);
     }
     assert_eq!(vec,vec![1,1,1,1,0,-1,-1,-1,-1]);
 }//}}}

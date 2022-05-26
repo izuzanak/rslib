@@ -1,9 +1,12 @@
 
 #![allow(dead_code)]
 
-const IDX_NOT_EXIST:u32 = std::u32::MAX;
-
 use std::os::raw::{c_int};
+use std::default::{Default};
+use std::cmp::{PartialEq,Eq,PartialOrd,Ord,Ordering};
+use std::fmt::{Debug,Display,Formatter};
+
+const IDX_NOT_EXIST:u32 = std::u32::MAX;
 
 extern
 {//{{{
@@ -42,7 +45,7 @@ pub struct TreeOrdIter<'a,T>
     idx:u32,
 }//}}}
 
-impl<T:std::default::Default + std::cmp::Ord> Tree<T>
+impl<T:Default + Ord> Tree<T>
 {//{{{
     fn __get_grandparent_idx(&self,idx:u32) -> u32
     {//{{{
@@ -60,8 +63,7 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
     {//{{{
         let gp_idx = self.__get_grandparent_idx(idx);
 
-        if gp_idx != IDX_NOT_EXIST
-        {
+        if gp_idx != IDX_NOT_EXIST {
           let gp = &self.data[gp_idx as usize];
           if gp.left_idx == self.data[idx as usize].parent_idx { gp.right_idx } else { gp.left_idx }
         }
@@ -85,8 +87,7 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
             self.root_idx = pivot_idx;
             self.data[pivot_idx as usize].parent_idx = IDX_NOT_EXIST;
         }
-        else
-        {
+        else {
           let root_parent_idx = self.data[root_idx as usize].parent_idx;
           let rp = &mut self.data[root_parent_idx as usize];
 
@@ -123,8 +124,7 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
             self.root_idx = pivot_idx;
             self.data[pivot_idx as usize].parent_idx = IDX_NOT_EXIST;
         }
-        else
-        {
+        else {
             let root_parent_idx = self.data[root_idx as usize].parent_idx;
             let rp = &mut self.data[root_parent_idx as usize];
 
@@ -196,14 +196,13 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
             self.data[new_idx as usize].parent_idx = IDX_NOT_EXIST;
             self.root_idx = new_idx;
         }
-        else
-        {
+        else {
             let mut node_idx = self.root_idx;
             loop {
                 let node = &mut self.data[node_idx as usize];
 
-                let comp_result = std::cmp::Ord::cmp(value,&node.value);
-                if comp_result == std::cmp::Ordering::Less {
+                let comp_result = Ord::cmp(value,&node.value);
+                if comp_result == Ordering::Less {
                     if node.left_idx == self.leaf_idx {
                         node.left_idx = new_idx;
                         break;
@@ -211,7 +210,7 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
                     node_idx = node.left_idx;
                 }
                 else {
-                    if unique && comp_result == std::cmp::Ordering::Equal {
+                    if unique && comp_result == Ordering::Equal {
                         return node_idx;
                     }
 
@@ -444,7 +443,7 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
 
     pub fn from(src:Vec<T>) -> Tree<T>
     {//{{{
-        let mut tree = Tree::<T>::new();
+        let mut tree = Tree::new();
 
         for value in src {
             tree.insert(value);
@@ -726,12 +725,12 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
         while node_idx != self.leaf_idx {
             let node = &self.data[node_idx as usize];
 
-            let comp_result = std::cmp::Ord::cmp(value,&node.value);
-            if comp_result == std::cmp::Ordering::Less {
+            let comp_result = Ord::cmp(value,&node.value);
+            if comp_result == Ordering::Less {
                 node_idx = node.left_idx;
             }
             else {
-                if comp_result == std::cmp::Ordering::Equal {
+                if comp_result == Ordering::Equal {
                     return node_idx;
                 }
 
@@ -753,12 +752,12 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
         while node_idx != self.leaf_idx {
           let node = &self.data[node_idx as usize];
 
-          let comp_result = std::cmp::Ord::cmp(value,&node.value);
-          if comp_result == std::cmp::Ordering::Less {
+          let comp_result = Ord::cmp(value,&node.value);
+          if comp_result == Ordering::Less {
             node_idx = node.left_idx;
           }
           else {
-            if comp_result == std::cmp::Ordering::Equal {
+            if comp_result == Ordering::Equal {
               good_idx = node_idx;
               node_idx = node.left_idx;
             }
@@ -782,13 +781,13 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
         while node_idx != self.leaf_idx {
           let node = &self.data[node_idx as usize];
 
-          let comp_result = std::cmp::Ord::cmp(value,&node.value);
-          if comp_result == std::cmp::Ordering::Less {
+          let comp_result = Ord::cmp(value,&node.value);
+          if comp_result == Ordering::Less {
             good_idx = node_idx;
             node_idx = node.left_idx;
           }
           else {
-            if comp_result == std::cmp::Ordering::Equal {
+            if comp_result == Ordering::Equal {
               return node_idx;
             }
 
@@ -810,12 +809,12 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
         while node_idx != self.leaf_idx {
           let node = &self.data[node_idx as usize];
 
-          let comp_result = std::cmp::Ord::cmp(value,&node.value);
-          if comp_result == std::cmp::Ordering::Less {
+          let comp_result = Ord::cmp(value,&node.value);
+          if comp_result == Ordering::Less {
             node_idx = node.left_idx;
           }
           else {
-            if comp_result  == std::cmp::Ordering::Equal {
+            if comp_result  == Ordering::Equal {
               return node_idx;
             }
 
@@ -841,15 +840,14 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
         while let Some(node_idx) = stack.pop() {
             let node = &self.data[node_idx as usize];
 
-            let comp_result = std::cmp::Ord::cmp(value,&node.value);
-            if comp_result == std::cmp::Ordering::Less {
+            let comp_result = Ord::cmp(value,&node.value);
+            if comp_result == Ordering::Less {
                 if node.left_idx != self.leaf_idx {
                     stack.push(node.left_idx);
                 }
             }
-            else
-            {
-                if comp_result == std::cmp::Ordering::Equal {
+            else {
+                if comp_result == Ordering::Equal {
                     result.push(node_idx);
 
                     if node.left_idx != self.leaf_idx {
@@ -892,7 +890,7 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
     }//}}}
 }//}}}
 
-impl<T:std::default::Default + std::cmp::Ord> std::cmp::PartialEq for Tree<T>
+impl<T:Default + Ord> PartialEq for Tree<T>
 {//{{{
     fn eq(&self,other:&Self) -> bool
     {//{{{
@@ -921,19 +919,19 @@ impl<T:std::default::Default + std::cmp::Ord> std::cmp::PartialEq for Tree<T>
     }//}}}
 }//}}}
 
-impl<T:std::default::Default + std::cmp::Ord> std::cmp::Eq for Tree<T> {}
+impl<T:Default + Ord> Eq for Tree<T> {}
 
-impl<T:std::default::Default + std::cmp::Ord> std::cmp::PartialOrd for Tree<T>
+impl<T:Default + Ord> PartialOrd for Tree<T>
 {//{{{
-    fn partial_cmp(&self,other:&Self) -> Option<std::cmp::Ordering>
+    fn partial_cmp(&self,other:&Self) -> Option<Ordering>
     {//{{{
-        Some(std::cmp::Ord::cmp(self,other))
+        Some(Ord::cmp(self,other))
     }//}}}
 }//}}}
 
-impl<T:std::default::Default + std::cmp::Ord> std::cmp::Ord for Tree<T>
+impl<T:Default + Ord> Ord for Tree<T>
 {//{{{
-    fn cmp(&self,other:&Self) -> std::cmp::Ordering
+    fn cmp(&self,other:&Self) -> Ordering
     {//{{{
         let mut stack:Vec<u32> = vec![];
         let mut o_stack:Vec<u32> = vec![];
@@ -945,8 +943,8 @@ impl<T:std::default::Default + std::cmp::Ord> std::cmp::Ord for Tree<T>
             let node = &self.data[idx as usize];
             let o_node = &other.data[o_idx as usize];
 
-            match std::cmp::Ord::cmp(&node.value,&o_node.value) {
-                std::cmp::Ordering::Equal => {},
+            match Ord::cmp(&node.value,&o_node.value) {
+                Ordering::Equal => {},
                 result => return result,
             }
 
@@ -955,15 +953,15 @@ impl<T:std::default::Default + std::cmp::Ord> std::cmp::Ord for Tree<T>
         }
 
         match (idx,o_idx) {
-            (IDX_NOT_EXIST,IDX_NOT_EXIST) => std::cmp::Ordering::Equal,
-            (IDX_NOT_EXIST,_) => std::cmp::Ordering::Less,
-            (_,IDX_NOT_EXIST) => std::cmp::Ordering::Greater,
+            (IDX_NOT_EXIST,IDX_NOT_EXIST) => Ordering::Equal,
+            (IDX_NOT_EXIST,_) => Ordering::Less,
+            (_,IDX_NOT_EXIST) => Ordering::Greater,
             _ => panic!(),
         }
     }//}}}
 }//}}}
 
-impl<'a,T:std::default::Default + std::cmp::Ord> Iterator for TreeOrdIter<'a,T>
+impl<'a,T:Default + Ord> Iterator for TreeOrdIter<'a,T>
 {//{{{
     type Item = &'a T;
     fn next(&mut self) -> Option<Self::Item>
@@ -979,7 +977,7 @@ impl<'a,T:std::default::Default + std::cmp::Ord> Iterator for TreeOrdIter<'a,T>
     }//}}}
 }//}}}
 
-impl<'a,T:std::default::Default + std::cmp::Ord> Iterator for TreeIter<'a,T>
+impl<'a,T:Default + Ord> Iterator for TreeIter<'a,T>
 {//{{{
     type Item = &'a T;
     fn next(&mut self) -> Option<Self::Item>
@@ -995,9 +993,9 @@ impl<'a,T:std::default::Default + std::cmp::Ord> Iterator for TreeIter<'a,T>
     }//}}}
 }//}}}
 
-impl<T:std::fmt::Display + std::default::Default + std::cmp::Ord> std::fmt::Display for Tree<T>
+impl<T:Display + Default + Ord> Display for Tree<T>
 {//{{{
-    fn fmt(&self,f:&mut std::fmt::Formatter) -> std::fmt::Result
+    fn fmt(&self,f:&mut Formatter) -> std::fmt::Result
     {//{{{
         write!(f,"[")?;
 
@@ -1010,9 +1008,9 @@ impl<T:std::fmt::Display + std::default::Default + std::cmp::Ord> std::fmt::Disp
     }//}}}
 }//}}}
 
-impl<T:std::fmt::Debug + std::default::Default + std::cmp::Ord> std::fmt::Debug for Tree<T>
+impl<T:Debug + Default + Ord> Debug for Tree<T>
 {//{{{
-    fn fmt(&self,f:&mut std::fmt::Formatter) -> std::fmt::Result
+    fn fmt(&self,f:&mut Formatter) -> std::fmt::Result
     {//{{{
         write!(f,"[")?;
 
@@ -1029,7 +1027,7 @@ impl<T:std::fmt::Debug + std::default::Default + std::cmp::Ord> std::fmt::Debug 
 mod tests {
 use super::*;
 
-impl<T:std::default::Default + std::cmp::Ord> Tree<T>
+impl<T:Default + Ord> Tree<T>
 {//{{{
     fn check_properties(&self) -> Result<(),&str>
     {//{{{
@@ -1113,8 +1111,8 @@ impl<T:std::default::Default + std::cmp::Ord> Tree<T>
                     break;
                 }
 
-                match std::cmp::Ord::cmp(&self.data[l_idx as usize].value,&self.data[idx as usize].value) {
-                    std::cmp::Ordering::Greater => return Err("ERROR: values in rb_tree are not sorted"),
+                match Ord::cmp(&self.data[l_idx as usize].value,&self.data[idx as usize].value) {
+                    Ordering::Greater => return Err("ERROR: values in rb_tree are not sorted"),
                     _ => {}
                 }
             }
@@ -1334,7 +1332,7 @@ fn ord_t0()
     let mut vec = vec![];
     for idx in 0..9 {
         tree1.insert(idx);
-        vec.push(std::cmp::Ord::cmp(&tree,&tree1) as i8);
+        vec.push(Ord::cmp(&tree,&tree1) as i8);
     }
     assert_eq!(vec,vec![1,1,1,1,0,-1,-1,-1,-1]);
 }//}}}
