@@ -898,6 +898,13 @@ impl<T:Default + Ord> PartialEq for Tree<T>
             return false;
         }
 
+        match (self.root_idx,other.root_idx) {
+            (IDX_NOT_EXIST,IDX_NOT_EXIST) => return true,
+            (IDX_NOT_EXIST,_) |
+            (_,IDX_NOT_EXIST) => return false,
+            _ => {}
+        }
+
         let mut stack:Vec<u32> = vec![];
         let mut o_stack:Vec<u32> = vec![];
 
@@ -929,10 +936,17 @@ impl<T:Default + Ord> PartialOrd for Tree<T>
     }//}}}
 }//}}}
 
-impl<T:Default + Ord> Ord for Tree<T>
+impl<T:Default + Ord + Ord> Ord for Tree<T>
 {//{{{
     fn cmp(&self,other:&Self) -> Ordering
     {//{{{
+        match (self.root_idx,other.root_idx) {
+            (IDX_NOT_EXIST,IDX_NOT_EXIST) => return Ordering::Equal,
+            (IDX_NOT_EXIST,_) => return Ordering::Less,
+            (_,IDX_NOT_EXIST) => return Ordering::Greater,
+            _ => {}
+        }
+
         let mut stack:Vec<u32> = vec![];
         let mut o_stack:Vec<u32> = vec![];
 
@@ -1321,6 +1335,7 @@ fn equal_t0()
         vec.push(tree == tree1);
     }
     assert_eq!(vec,vec![false,false,false,false,true,false,false,false,false]);
+    assert_eq!(Tree::<u32>::new(),Tree::<u32>::new());
 }//}}}
 
 #[test]

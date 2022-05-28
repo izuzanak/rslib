@@ -2,25 +2,28 @@
 
 const ERROR_INVALID_VALUE_TYPE:&str = "Invalid value type";
 
-#[derive(Debug,Clone,PartialEq,PartialOrd)]
-pub enum Data {
+#[derive(Debug,PartialEq,PartialOrd)]
+pub enum Data
+{//{{{
     Blank,
     Bool   (bool),
     Int    (i64),
     Float  (f64),
     String (String),
     Array  (Vec<Var>),
-    Dict   (std::collections::BTreeMap<Var,Var>),
-}
+    Dict   (tree::Tree<VarMap>),
+}//}}}
 
 impl Eq for Data {}
-impl Ord for Data {
+impl Ord for Data
+{//{{{
     fn cmp(&self,other:&Self) -> std::cmp::Ordering {
         self.partial_cmp(other).unwrap()
     }
-}
+}//}}}
 
-impl std::fmt::Display for Data {
+impl std::fmt::Display for Data
+{//{{{
     fn fmt(&self,f: &mut std::fmt::Formatter) -> std::fmt::Result
     {//{{{
         match *self {
@@ -40,35 +43,36 @@ impl std::fmt::Display for Data {
                 }
             },
             Data::Dict(ref value) => {
-                if value.is_empty() { write!(f,"[]") }
-                else {
-                    let mut first = true;
-                    for (key,item) in value {
-                        write!(f,"{}{}:{}",if first { first = false; '[' } else { ',' },key,item)?
-                    }
-                    write!(f,"]")
+                let mut first = true;
+                for item in value.iter() {
+                    write!(f,"{}{}:{}",if first { first = false; '[' } else { ',' },item.key,item.value)?
                 }
+                write!(f,"]")
             }
         }
     }//}}}
-}
+}//}}}
 
-struct Loc {
+struct Loc
+{//{{{
     data:Data,
-    refs:std::sync::atomic::AtomicUsize
-}
+    refs:std::sync::atomic::AtomicUsize,
+}//}}}
 
-impl Loc {
+impl Loc
+{//{{{
     fn unref(&mut self) -> usize {
         self.refs.fetch_sub(1,std::sync::atomic::Ordering::Relaxed)
     }
-}
+}//}}}
 
-pub struct Var {
-    loc:*mut Loc
-}
+pub struct Var
+{//{{{
+    loc:*mut Loc,
+}//}}}
 
-impl Var {
+impl Var
+{//{{{
     pub fn blank() -> Var {
         let loc = Box::new(Loc{data:Data::Blank,refs:std::sync::atomic::AtomicUsize::new(1)});
         Var{loc:Box::into_raw(loc)}
@@ -93,7 +97,7 @@ impl Var {
         let loc = Box::new(Loc{data:Data::Array(val),refs:std::sync::atomic::AtomicUsize::new(1)});
         Var{loc:Box::into_raw(loc)}
     }
-    pub fn dict(val:std::collections::BTreeMap<Var,Var>) -> Var {
+    pub fn dict(val:tree::Tree<VarMap>) -> Var {
         let loc = Box::new(Loc{data:Data::Dict(val),refs:std::sync::atomic::AtomicUsize::new(1)});
         Var{loc:Box::into_raw(loc)}
     }
@@ -178,7 +182,7 @@ impl Var {
             }
         }
     }//}}}
-    pub fn to_dict(&self) -> Result<&mut std::collections::BTreeMap<Var,Var>,err::Error>
+    pub fn to_dict(&self) -> Result<&mut tree::Tree<VarMap>,err::Error>
     {//{{{
         unsafe {
             match &mut (*self.loc).data {
@@ -192,58 +196,87 @@ impl Var {
             }
         }
     }//}}}
-}
+}//}}}
 
-impl PartialEq for Var {
+impl Default for Var
+{//{{{
+    fn default() -> Var {
+        Var::blank()
+    }
+}//}}}
+
+impl PartialEq for Var
+{//{{{
     fn eq(&self,other:&Self) -> bool {
         unsafe { (*self.loc).data.eq(&(*other.loc).data) }
     }
-}
+}//}}}
 
-impl PartialOrd for Var {
+impl PartialOrd for Var
+{//{{{
     fn partial_cmp(&self,other:&Self) -> Option<std::cmp::Ordering> {
         unsafe { (*self.loc).data.partial_cmp(&(*other.loc).data) }
     }
-}
+}//}}}
 
 impl Eq for Var {}
 
-impl Ord for Var {
+impl Ord for Var
+{//{{{
     fn cmp(&self,other:&Self) -> std::cmp::Ordering {
         unsafe { (*self.loc).data.cmp(&(*other.loc).data) }
     }
-}
+}//}}}
 
-impl Clone for Var {
-    fn clone(&self) -> Self {
-        unsafe {
-            let loc = Box::new(Loc{data:(*self.loc).data.clone(),refs:std::sync::atomic::AtomicUsize::new(1)});
-            Var{loc:Box::into_raw(loc)}
-        }
-    }
-}
+//impl Clone for Var
+//{//{{{
+//    fn clone(&self) -> Self {
+//        unsafe {
+//            let loc = Box::new(Loc{data:(*self.loc).data.clone(),refs:std::sync::atomic::AtomicUsize::new(1)});
+//            Var{loc:Box::into_raw(loc)}
+//        }
+//    }
+//}//}}}
 
-impl Drop for Var {
+impl Drop for Var
+{//{{{
     fn drop(&mut self) {
         unsafe { if (*self.loc).unref() <= 1 { drop(Box::from_raw(self.loc)); } }
     }
-}
+}//}}}
 
-impl std::fmt::Display for Var {
+impl std::fmt::Display for Var
+{//{{{
     fn fmt(&self,f: &mut std::fmt::Formatter) -> std::fmt::Result
     {//{{{
         unsafe { std::fmt::Display::fmt(&(*self.loc).data,f) }
     }//}}}
-}
+}//}}}
 
-impl std::fmt::Debug for Var {
+impl std::fmt::Debug for Var
+{//{{{
     fn fmt(&self,f: &mut std::fmt::Formatter) -> std::fmt::Result {
         unsafe {
             let loc = &*self.loc;
             write!(f,"{:?}#{}",loc.data,loc.refs.load(std::sync::atomic::Ordering::Relaxed))
         }
     }
-}
+}//}}}
+
+#[derive(Default,Debug,PartialEq,Eq,PartialOrd)]
+pub struct VarMap
+{//{{{
+    key:Var,
+    value:Var,
+}//}}}
+
+impl Ord for VarMap
+{//{{{
+    fn cmp(&self,other:&Self) -> std::cmp::Ordering
+    {//{{{
+        Ord::cmp(&self.key,&other.key)
+    }//}}}
+}//}}}
 
 #[macro_export]
 macro_rules! var {
@@ -299,13 +332,13 @@ macro_rules! var_internal
 
     // - insert the current entry followed by trailing comma -
     (@dict $object:ident [$key:expr] ($value:expr) , $($rest:tt)*) => {
-        $object.insert($key,$value);
+        $object.insert(VarMap{key:$key,value:$value});
         var_internal!(@dict $object () ($($rest)*) ($($rest)*));
     };
 
     // - insert the last entry without trailing comma -
     (@dict $object:ident [$key:expr] ($value:expr)) => {
-        $object.insert($key,$value);
+        $object.insert(VarMap{key:$key,value:$value});
     };
 
     // - process values -
@@ -389,13 +422,13 @@ macro_rules! var_internal
     (s($value:expr)) => { $crate::Var::str($value) };
     (v($value:expr)) => { $crate::Var::var(&$value) };
     ([]) => { $crate::Var::array(vec![]) };
-    ({}) => { $crate::Var::dict(std::collections::BTreeMap::new()) };
+    ({}) => { $crate::Var::dict(tree::Tree::new()) };
     ([ $($tt:tt)+ ]) => {
         $crate::Var::array(var_internal!(@array [] $($tt)+))
     };
     ({ $($tt:tt)+ }) => {
         $crate::Var::dict({
-            let mut map = std::collections::BTreeMap::new();
+            let mut map = tree::Tree::new();
             var_internal!(@dict map () ($($tt)+) ($($tt)+));
             map
         })
@@ -505,15 +538,15 @@ fn array_t1()
 #[test]
 fn dict_t0()
 {//{{{
-    let dict = Var::dict(std::collections::BTreeMap::new());
+    let dict = Var::dict(tree::Tree::new());
 
     let ref mut map = dict.to_dict().unwrap();
-    map.insert(Var::str("One"),Var::int(1));
-    map.insert(Var::str("Two"),Var::int(2));
-    map.insert(Var::str("Three"),Var::int(3));
-    map.insert(Var::str("Four"),Var::int(4));
+    map.insert(VarMap{key:Var::str("One"),value:Var::int(1)});
+    map.insert(VarMap{key:Var::str("Two"),value:Var::int(2)});
+    map.insert(VarMap{key:Var::str("Three"),value:Var::int(3)});
+    map.insert(VarMap{key:Var::str("Four"),value:Var::int(4)});
 
-    assert_eq!(format!("{}",dict),"[Four:4,One:1,Three:3,Two:2]");
+    assert_eq!(format!("{}",dict),"[One:1,Two:2,Three:3,Four:4]");
 }//}}}
 
 #[test]
@@ -573,34 +606,34 @@ fn var_partial_ord_t0()
     assert!(Var::array(vec![]) < Var::array(vec![Var::blank()]));
 }//}}}
 
-#[test]
-fn var_clone_t0()
-{//{{{
-    let array_0 = Var::array(vec![
-        Var::int(1), Var::int(2), Var::int(3)
-    ]);
-
-    let array_1 = Var::var(&array_0);
-    let array_2 = array_0.clone();
-
-    array_0.to_array().unwrap().push(Var::int(4));
-    assert_eq!(array_0,array_1);
-    assert_ne!(array_0,array_2);
-
-    let dict_0 = Var::dict(std::collections::BTreeMap::new());
-    let dmap = dict_0.to_dict().unwrap();
-
-    dmap.insert(Var::str("One"),Var::int(1));
-    dmap.insert(Var::str("Two"),Var::int(2));
-    dmap.insert(Var::str("Three"),Var::int(3));
-
-    let dict_1 = Var::var(&dict_0);
-    let dict_2 = dict_0.clone();
-
-    dmap.insert(Var::str("Four"),Var::int(4));
-    assert_eq!(dict_0,dict_1);
-    assert_ne!(dict_0,dict_2);
-}//}}}
+//#[test]
+//fn var_clone_t0()
+//{//{{{
+//    let array_0 = Var::array(vec![
+//        Var::int(1), Var::int(2), Var::int(3)
+//    ]);
+//
+//    let array_1 = Var::var(&array_0);
+//    let array_2 = array_0.clone();
+//
+//    array_0.to_array().unwrap().push(Var::int(4));
+//    assert_eq!(array_0,array_1);
+//    assert_ne!(array_0,array_2);
+//
+//    let dict_0 = Var::dict(tree::Tree::new());
+//    let dmap = dict_0.to_dict().unwrap();
+//
+//    dmap.insert((Var::str("One"),Var::int(1)));
+//    dmap.insert((Var::str("Two"),Var::int(2)));
+//    dmap.insert((Var::str("Three"),Var::int(3)));
+//
+//    let dict_1 = Var::var(&dict_0);
+//    let dict_2 = dict_0.clone();
+//
+//    dmap.insert((Var::str("Four"),Var::int(4)));
+//    assert_eq!(dict_0,dict_1);
+//    assert_ne!(dict_0,dict_2);
+//}//}}}
 
 #[test]
 fn var_display_fmt_t0()
@@ -666,7 +699,7 @@ fn macro_t0()
     assert_eq!(var!(f(123.45)),Var::float(123.45));
     assert_eq!(var!(s("Hello world")),Var::str("Hello world"));
     assert_eq!(var!([]),Var::array(vec![]));
-    assert_eq!(var!({}),Var::dict(std::collections::BTreeMap::new()));
+    assert_eq!(var!({}),Var::dict(tree::Tree::new()));
 }//}}}
 
 #[test]
@@ -676,34 +709,34 @@ fn macro_t1()
     assert_eq!(var!(v(var)),var);
 
     let var1 = var!({
-        s("blank") : blank,
-        s("bool") : true,
-        s("integer") : i(123),
-        s("float") : f(123.45),
-        s("string") : s("Hello world"),
-        s("array") : [i(1),i(2),i(3)],
-        s("dict") : {
-            s("One") : i(1),
-            s("Two") : i(2),
-            s("Three") : i(3),
+        s("blank"):blank,
+        s("bool"):true,
+        s("integer"):i(123),
+        s("float"):f(123.45),
+        s("string"):s("Hello world"),
+        s("array"):[i(1),i(2),i(3)],
+        s("dict"):{
+            s("One"):i(1),
+            s("Two"):i(2),
+            s("Three"):i(3),
         },
     });
-    assert_eq!(format!("{}",var1),"[array:[1,2,3],blank:<blank>,bool:true,dict:[One:1,Three:3,Two:2],float:123.45,integer:123,string:Hello world]");
+    assert_eq!(format!("{}",var1),"[blank:<blank>,bool:true,integer:123,float:123.45,string:Hello world,array:[1,2,3],dict:[One:1,Two:2,Three:3]]");
 
     let var2 = var!({
-        blank : s("blank"),
-        true : s("bool"),
-        i(123) : s("integer"),
-        f(123.45) : s("float"),
-        s("Hello world") : s("string"),
-        [i(1),i(2),i(3)] : s("array"),
+        blank:s("blank"),
+        true:s("bool"),
+        i(123):s("integer"),
+        f(123.45):s("float"),
+        s("Hello world"):s("string"),
+        [i(1),i(2),i(3)]:s("array"),
         {
-            s("One") : i(1),
-            s("Two") : i(2),
-            s("Three") : i(3),
-        } : s("dict"),
+            s("One"):i(1),
+            s("Two"):i(2),
+            s("Three"):i(3),
+        }:s("dict"),
     });
-    assert_eq!(format!("{}",var2),"[<blank>:blank,true:bool,123:integer,123.45:float,Hello world:string,[1,2,3]:array,[One:1,Three:3,Two:2]:dict]")
+    assert_eq!(format!("{}",var2),"[<blank>:blank,true:bool,123:integer,123.45:float,Hello world:string,[1,2,3]:array,[One:1,Two:2,Three:3]:dict]")
 }//}}}
 }
 

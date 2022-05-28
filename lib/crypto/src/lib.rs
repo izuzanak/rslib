@@ -224,7 +224,7 @@ impl DigestInfo {
         }
 
         unsafe {
-            let mdt = EVP_get_digestbyname(std::ffi::CStr::from_bytes_with_nul_unchecked(name.as_bytes()).as_ptr());
+            let mdt = EVP_get_digestbyname(name.as_ptr() as *const c_char);
 
             if mdt.is_null() {
                 err!(CRYPTO_DIGEST_INVALID_ALGORITHM_NAME)
@@ -327,7 +327,7 @@ impl CipherInfo {
         }
 
         unsafe {
-            let ct = EVP_get_cipherbyname(std::ffi::CStr::from_bytes_with_nul_unchecked(name.as_bytes()).as_ptr());
+            let ct = EVP_get_cipherbyname(name.as_ptr() as *const c_char);
 
             if ct.is_null() {
                 err!(CRYPTO_CIPHER_INVALID_ALGORITHM_NAME)

@@ -5,3 +5,4 @@ authors = ["Jiří Zuzaňák <zuzanakjiri@gmail.com>"]
 
 [dependencies]
 err = { path = "../err" }
+tree = { path = "../tree" }
