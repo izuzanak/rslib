@@ -266,8 +266,8 @@ impl std::fmt::Debug for Var
 #[derive(Default,Debug,PartialEq,Eq,PartialOrd)]
 pub struct VarMap
 {//{{{
-    key:Var,
-    value:Var,
+    pub key:Var,
+    pub value:Var,
 }//}}}
 
 impl Ord for VarMap
@@ -332,13 +332,13 @@ macro_rules! var_internal
 
     // - insert the current entry followed by trailing comma -
     (@dict $object:ident [$key:expr] ($value:expr) , $($rest:tt)*) => {
-        $object.insert(VarMap{key:$key,value:$value});
+        $object.insert($crate::VarMap{key:$key,value:$value});
         var_internal!(@dict $object () ($($rest)*) ($($rest)*));
     };
 
     // - insert the last entry without trailing comma -
     (@dict $object:ident [$key:expr] ($value:expr)) => {
-        $object.insert(VarMap{key:$key,value:$value});
+        $object.insert($crate::VarMap{key:$key,value:$value});
     };
 
     // - process values -

@@ -813,9 +813,10 @@ impl<'a> Parser<'a>
     }
 
     fn pa_object_pair(&mut self) -> bool {
-        self.objects.last().unwrap().to_dict().unwrap().insert(
-            self.strings.pop().unwrap(),
-            self.values.pop().unwrap());
+        self.objects.last().unwrap().to_dict().unwrap().insert(var::VarMap{
+            key:self.strings.pop().unwrap(),
+            value:self.values.pop().unwrap(),
+        });
 
         true
     }
@@ -1066,12 +1067,12 @@ impl Creator {
                 self.result.push('{');
 
                 let mut first = true;
-                for (key, item) in value.iter() {
+                for item in value.iter() {
 
                     if !first { self.result.push(','); }
                     first = false;
 
-                    match key.data() {
+                    match item.key.data() {
                         &Data::String(ref value) => {
                             self.result.push('"');
                             self.append_string(&value);
@@ -1081,7 +1082,7 @@ impl Creator {
                         _ => return err!(JSON_CREATE_NO_STRING_DICT_KEY),
                     }
 
-                    match self.create(&item) {
+                    match self.create(&item.value) {
                         Err(err) => return Err(err),
                         _ => {},
                     }
@@ -1155,12 +1156,12 @@ impl Creator {
             &Data::Dict(ref value) => {
                 self.result.push('{');
 
-                if !value.is_empty() {
+                if !value.len() != 0 {
                     self.cn_push_tab();
                     self.cn_nice_indent();
 
                     let mut first = true;
-                    for (key, item) in value.iter() {
+                    for item in value.iter() {
 
                         if !first {
                             self.result.push(',');
@@ -1168,7 +1169,7 @@ impl Creator {
                         }
                         first = false;
 
-                        match key.data() {
+                        match item.key.data() {
                             &Data::String(ref value) => {
                                 self.result.push('"');
                                 self.append_string(&value);
@@ -1178,7 +1179,7 @@ impl Creator {
                             _ => return err!(JSON_CREATE_NO_STRING_DICT_KEY),
                         }
 
-                        match self.create_nice(&item) {
+                        match self.create_nice(&item.value) {
                             Err(err) => return Err(err),
                             _ => {},
                         }
@@ -1304,7 +1305,7 @@ fn create_t0()
     assert_eq!(create(&var!(f(12.345))).unwrap(),"12.345");
     assert_eq!(create(&var!(s("Hello world"))).unwrap(),"\"Hello world\"");
     assert_eq!(create(&var!([i(1),i(2),i(3),[i(1),i(2),i(3)]])).unwrap(),"[1,2,3,[1,2,3]]");
-    assert_eq!(create(&var!({s("one"):i(1),s("two"):i(2),s("three"):i(3)})).unwrap(),"{\"one\":1,\"three\":3,\"two\":2}");
+    assert_eq!(create(&var!({s("one"):i(1),s("two"):i(2),s("three"):i(3)})).unwrap(),"{\"one\":1,\"two\":2,\"three\":3}");
 }//}}}
 
 #[test]
@@ -1345,7 +1346,7 @@ fn create_nice_t0()
             format!("[\n{0}1,\n{0}2,\n{0}3,\n{0}[\n{0}{0}1,\n{0}{0}2,\n{0}{0}3\n{0}]\n]",tab_str));
 
     assert_eq!(create_nice(&var!({s("one"):i(1),s("two"):i(2),s("three"):i(3)}),tab_str).unwrap(),
-            format!("{{\n{0}\"one\":1,\n{0}\"three\":3,\n{0}\"two\":2\n}}",tab_str));
+            format!("{{\n{0}\"one\":1,\n{0}\"two\":2,\n{0}\"three\":3\n}}",tab_str));
 
     println!("create nice: {}",create_nice(&var!(
 {
@@ -1365,6 +1366,9 @@ fn create_nice_t0()
     s("object"):{s("one"):i(1),s("two"):i(2),s("three"):i(3)},
 }),tab_str).unwrap(),
 format!("{{
+{0}\"one\":1,
+{0}\"two\":2,
+{0}\"three\":3,
 {0}\"array\":[
 {0}{0}1,
 {0}{0}2,
@@ -1372,12 +1376,9 @@ format!("{{
 {0}],
 {0}\"object\":{{
 {0}{0}\"one\":1,
-{0}{0}\"three\":3,
-{0}{0}\"two\":2
-{0}}},
-{0}\"one\":1,
-{0}\"three\":3,
-{0}\"two\":2
+{0}{0}\"two\":2,
+{0}{0}\"three\":3
+{0}}}
 }}",tab_str));
 }//}}}
 

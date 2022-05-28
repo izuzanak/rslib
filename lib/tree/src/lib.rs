@@ -936,7 +936,7 @@ impl<T:Default + Ord> PartialOrd for Tree<T>
     }//}}}
 }//}}}
 
-impl<T:Default + Ord + Ord> Ord for Tree<T>
+impl<T:Default + Ord> Ord for Tree<T>
 {//{{{
     fn cmp(&self,other:&Self) -> Ordering
     {//{{{
