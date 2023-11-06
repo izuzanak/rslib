@@ -1037,6 +1037,15 @@ impl<T:Debug + Default + Ord> Debug for Tree<T>
     }//}}}
 }//}}}
 
+impl<T> std::ops::Index<u32> for Tree<T>
+{//{{{
+    type Output = T;
+
+    fn index(&self, idx: u32) -> &T {
+        &self.data[idx as usize].value
+    }
+}//}}}
+
 #[cfg(test)]
 mod tests {
 use super::*;
@@ -1350,6 +1359,18 @@ fn ord_t0()
         vec.push(Ord::cmp(&tree,&tree1) as i8);
     }
     assert_eq!(vec,vec![1,1,1,1,0,-1,-1,-1,-1]);
+}//}}}
+
+#[test]
+fn index_t0()
+{//{{{
+    let values = [0,1,2,3,4,5,6,7,8,9];
+    let tree = Tree::<u32>::from(values.to_vec());
+    for value in values.to_vec() {
+        let idx = tree.get_idx(&value);
+        let ret_value = tree[idx];
+        assert_eq!(value,ret_value)
+    }
 }//}}}
 
 #[test]

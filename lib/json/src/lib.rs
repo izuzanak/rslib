@@ -1348,23 +1348,21 @@ fn create_nice_t0()
     assert_eq!(create_nice(&var!({s("one"):i(1),s("two"):i(2),s("three"):i(3)}),tab_str).unwrap(),
             format!("{{\n{0}\"one\":1,\n{0}\"two\":2,\n{0}\"three\":3\n}}",tab_str));
 
-    println!("create nice: {}",create_nice(&var!(
-{
-    s("one"):i(1),
-    s("two"):i(2),
-    s("three"):i(3),
-    s("array"):[i(1),i(2),i(3)],
-    s("object"):{s("one"):i(1),s("two"):i(2),s("three"):i(3)},
-}),tab_str).unwrap());
+    println!("create nice: {}",create_nice(&var!({
+        s("one"):i(1),
+        s("two"):i(2),
+        s("three"):i(3),
+        s("array"):[i(1),i(2),i(3)],
+        s("object"):{s("one"):i(1),s("two"):i(2),s("three"):i(3)},
+    }),tab_str).unwrap());
 
-    assert_eq!(create_nice(&var!(
-{
-    s("one"):i(1),
-    s("two"):i(2),
-    s("three"):i(3),
-    s("array"):[i(1),i(2),i(3)],
-    s("object"):{s("one"):i(1),s("two"):i(2),s("three"):i(3)},
-}),tab_str).unwrap(),
+    assert_eq!(create_nice(&var!({
+        s("one"):i(1),
+        s("two"):i(2),
+        s("three"):i(3),
+        s("array"):[i(1),i(2),i(3)],
+        s("object"):{s("one"):i(1),s("two"):i(2),s("three"):i(3)},
+    }),tab_str).unwrap(),
 format!("{{
 {0}\"one\":1,
 {0}\"two\":2,

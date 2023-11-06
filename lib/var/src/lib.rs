@@ -117,12 +117,7 @@ impl Var
         unsafe {
             match &mut (*self.loc).data {
                 &mut Data::Bool(value) => Ok(value),
-                &mut Data::Blank     |
-                &mut Data::Int(_)    |
-                &mut Data::Float(_)  |
-                &mut Data::String(_) |
-                &mut Data::Array(_)  |
-                &mut Data::Dict(_)   => err!(ERROR_INVALID_VALUE_TYPE)
+                _ => err!(ERROR_INVALID_VALUE_TYPE)
             }
         }
     }//}}}
@@ -131,12 +126,7 @@ impl Var
         unsafe {
             match &mut (*self.loc).data {
                 &mut Data::Int(value) => Ok(value),
-                &mut Data::Blank     |
-                &mut Data::Bool(_)   |
-                &mut Data::Float(_)  |
-                &mut Data::String(_) |
-                &mut Data::Array(_)  |
-                &mut Data::Dict(_)   => err!(ERROR_INVALID_VALUE_TYPE)
+                _ => err!(ERROR_INVALID_VALUE_TYPE)
             }
         }
     }//}}}
@@ -145,12 +135,7 @@ impl Var
         unsafe {
             match &mut (*self.loc).data {
                 &mut Data::Float(value) => Ok(value),
-                &mut Data::Blank     |
-                &mut Data::Bool(_)   |
-                &mut Data::Int(_)    |
-                &mut Data::String(_) |
-                &mut Data::Array(_)  |
-                &mut Data::Dict(_)   => err!(ERROR_INVALID_VALUE_TYPE)
+                _ => err!(ERROR_INVALID_VALUE_TYPE)
             }
         }
     }//}}}
@@ -159,12 +144,7 @@ impl Var
         unsafe {
             match &mut (*self.loc).data {
                 &mut Data::String(ref value) => Ok(value),
-                &mut Data::Blank     |
-                &mut Data::Bool(_)   |
-                &mut Data::Int(_)    |
-                &mut Data::Float(_)  |
-                &mut Data::Array(_)  |
-                &mut Data::Dict(_)   => err!(ERROR_INVALID_VALUE_TYPE)
+                _ => err!(ERROR_INVALID_VALUE_TYPE)
             }
         }
     }//}}}
@@ -173,12 +153,7 @@ impl Var
         unsafe {
             match &mut (*self.loc).data {
                 &mut Data::Array(ref mut value) => Ok(value),
-                &mut Data::Blank     |
-                &mut Data::Bool(_)   |
-                &mut Data::Int(_)    |
-                &mut Data::Float(_)  |
-                &mut Data::String(_) |
-                &mut Data::Dict(_)   => err!(ERROR_INVALID_VALUE_TYPE)
+                _ => err!(ERROR_INVALID_VALUE_TYPE)
             }
         }
     }//}}}
@@ -187,12 +162,7 @@ impl Var
         unsafe {
             match &mut (*self.loc).data {
                 &mut Data::Dict(ref mut value) => Ok(value),
-                &mut Data::Blank     |
-                &mut Data::Bool(_)   |
-                &mut Data::Int(_)    |
-                &mut Data::Float(_)  |
-                &mut Data::String(_) |
-                &mut Data::Array(_)  => err!(ERROR_INVALID_VALUE_TYPE)
+                _ => err!(ERROR_INVALID_VALUE_TYPE)
             }
         }
     }//}}}
