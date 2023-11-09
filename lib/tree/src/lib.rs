@@ -1041,8 +1041,15 @@ impl<T> std::ops::Index<u32> for Tree<T>
 {//{{{
     type Output = T;
 
-    fn index(&self, idx: u32) -> &T {
+    fn index(&self,idx: u32) -> &T {
         &self.data[idx as usize].value
+    }
+}//}}}
+
+impl<T> std::ops::IndexMut<u32> for Tree<T>
+{//{{{
+    fn index_mut(&mut self,idx: u32) -> &mut Self::Output {
+        &mut self.data[idx as usize].value
     }
 }//}}}
 
@@ -1371,6 +1378,56 @@ fn index_t0()
         let ret_value = tree[idx];
         assert_eq!(value,ret_value)
     }
+}//}}}
+
+#[test]
+fn index_mut_t0()
+{//{{{
+    #[derive(Default,Debug)]
+    struct U32Map {
+        key:u32,
+        value:u32,
+    }
+    impl PartialEq for U32Map
+    {//{{{
+        fn eq(&self,other:&Self) -> bool {
+            self.key == other.key
+        }
+    }//}}}
+    impl Eq for U32Map {}
+    impl PartialOrd for U32Map
+    {//{{{
+        fn partial_cmp(&self,other:&Self) -> Option<Ordering>
+        {//{{{
+            Some(Ord::cmp(&self.key,&other.key))
+        }//}}}
+    }//}}}
+    impl Ord for U32Map
+    {//{{{
+        fn cmp(&self,other:&Self) -> Ordering
+        {//{{{
+            Ord::cmp(&self.key,&other.key)
+        }//}}}
+    }//}}}
+    impl Display for U32Map
+    {//{{{
+        fn fmt(&self,f:&mut Formatter) -> std::fmt::Result
+        {//{{{
+            write!(f,"{{{},{}}}",self.key,self.value)
+        }//}}}
+    }//}}}
+
+    let mut tree = Tree::<U32Map>::new();
+    for key in 0..8 {
+        tree.insert(U32Map{key:key,value:0});
+    }
+    assert_eq!(format!("{}",tree),"[{0,0},{1,0},{2,0},{3,0},{4,0},{5,0},{6,0},{7,0}]");
+
+    for key in 0..8 {
+        let idx = tree.get_idx(&U32Map{key:key,value:0});
+        tree[idx].value = key;
+    }
+    assert_eq!(format!("{}",tree),"[{0,0},{1,1},{2,2},{3,3},{4,4},{5,5},{6,6},{7,7}]");
 }//}}}
 
 #[test]

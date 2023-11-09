@@ -393,6 +393,22 @@ impl<T:Debug> Debug for List<T>
     }//}}}
 }//}}}
 
+impl<T> std::ops::Index<u32> for List<T>
+{//{{{
+    type Output = T;
+
+    fn index(&self,idx: u32) -> &T {
+        &self.data[idx as usize].value
+    }
+}//}}}
+
+impl<T> std::ops::IndexMut<u32> for List<T>
+{//{{{
+    fn index_mut(&mut self,idx: u32) -> &mut Self::Output {
+        &mut self.data[idx as usize].value
+    }
+}//}}}
+
 #[cfg(test)]
 mod tests {
 use super::*;
@@ -561,6 +577,30 @@ fn ord_t0()
         vec.push(Ord::cmp(&list,&list1) as i8);
     }
     assert_eq!(vec,vec![1,1,1,1,0,-1,-1,-1,-1]);
+}//}}}
+
+#[test]
+fn index_t0()
+{//{{{
+    let values = [0,1,2,3,4,5,6,7,8,9];
+    let list = List::<u32>::from(values.to_vec());
+    for value in values.to_vec() {
+        let idx = list.get_idx(&value);
+        let ret_value = list[idx];
+        assert_eq!(value,ret_value)
+    }
+}//}}}
+
+#[test]
+fn index_mut_t0()
+{//{{{
+    let values = [0,1,2,3,4,5,6,7,8,9];
+    let mut list = List::<u32>::from(values.to_vec());
+    for value in values.to_vec() {
+        let idx = list.get_idx(&value);
+        list[idx] = 9;
+    }
+    assert_eq!(format!("{}",list),"[9,9,9,9,9,9,9,9,9,9]");
 }//}}}
 
 }

@@ -1,0 +1,10 @@
+[package]
+name = "cont"
+version = "0.1.0"
+authors = ["Jiří Zuzaňák <zuzanakjiri@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+
+# To compile/run: run prepare.sh
+
