@@ -1,4 +1,3 @@
-
 #![allow(dead_code)]
 
 use std::os::raw::{c_int};
@@ -8,45 +7,41 @@ use std::fmt::{Debug,Display,Formatter};
 
 const IDX_NOT_EXIST:u32 = std::u32::MAX;
 
-extern
-{//{{{
+extern {
     fn rand() -> c_int;
-}//}}}
+}
 
-struct TreeNode<T>
-{//{{{
+#[derive(Clone)]
+struct TreeNode<T> {
     parent_idx:u32,
     left_idx:u32,
     right_idx:u32,
     color:bool,
     valid:bool,
     value:T,
-}//}}}
+}
 
-pub struct Tree<T>
-{//{{{
+#[derive(Clone)]
+pub struct Tree<T> {
     free_idx:u32,
     root_idx:u32,
     leaf_idx:u32,
     count:u32,
     data:Vec<TreeNode<T>>,
-}//}}}
+}
 
-pub struct TreeIter<'a,T>
-{//{{{
+pub struct TreeIter<'a,T> {
     tree:&'a Tree<T>,
     idx:u32,
-}//}}}
+}
 
-pub struct TreeOrdIter<'a,T>
-{//{{{
+pub struct TreeOrdIter<'a,T> {
     tree:&'a Tree<T>,
     stack:Vec<u32>,
     idx:u32,
-}//}}}
+}
 
-impl<T:Default + Ord> Tree<T>
-{//{{{
+impl<T:Default + Ord> Tree<T> {
     fn __get_grandparent_idx(&self,idx:u32) -> u32
     {//{{{
         let node_parent_idx = self.data[idx as usize].parent_idx;
@@ -449,7 +444,7 @@ impl<T:Default + Ord> Tree<T>
             tree.insert(value);
         }
 
-        return tree;
+        tree
     }//}}}
 
     pub fn len(&self) -> u32
@@ -888,10 +883,9 @@ impl<T:Default + Ord> Tree<T>
             idx:idx,
         }
     }//}}}
-}//}}}
+}
 
-impl<T:Default + Ord> PartialEq for Tree<T>
-{//{{{
+impl<T:Default + Ord> PartialEq for Tree<T> {
     fn eq(&self,other:&Self) -> bool
     {//{{{
         if self.len() != other.len() {
@@ -924,20 +918,18 @@ impl<T:Default + Ord> PartialEq for Tree<T>
 
         true
     }//}}}
-}//}}}
+}
 
 impl<T:Default + Ord> Eq for Tree<T> {}
 
-impl<T:Default + Ord> PartialOrd for Tree<T>
-{//{{{
+impl<T:Default + Ord> PartialOrd for Tree<T> {
     fn partial_cmp(&self,other:&Self) -> Option<Ordering>
     {//{{{
         Some(Ord::cmp(self,other))
     }//}}}
-}//}}}
+}
 
-impl<T:Default + Ord> Ord for Tree<T>
-{//{{{
+impl<T:Default + Ord> Ord for Tree<T> {
     fn cmp(&self,other:&Self) -> Ordering
     {//{{{
         match (self.root_idx,other.root_idx) {
@@ -973,10 +965,9 @@ impl<T:Default + Ord> Ord for Tree<T>
             _ => panic!(),
         }
     }//}}}
-}//}}}
+}
 
-impl<'a,T:Default + Ord> Iterator for TreeOrdIter<'a,T>
-{//{{{
+impl<'a,T:Default + Ord> Iterator for TreeOrdIter<'a,T> {
     type Item = &'a T;
     fn next(&mut self) -> Option<Self::Item>
     {//{{{
@@ -989,10 +980,9 @@ impl<'a,T:Default + Ord> Iterator for TreeOrdIter<'a,T>
             }
         }
     }//}}}
-}//}}}
+}
 
-impl<'a,T:Default + Ord> Iterator for TreeIter<'a,T>
-{//{{{
+impl<'a,T:Default + Ord> Iterator for TreeIter<'a,T> {
     type Item = &'a T;
     fn next(&mut self) -> Option<Self::Item>
     {//{{{
@@ -1005,10 +995,9 @@ impl<'a,T:Default + Ord> Iterator for TreeIter<'a,T>
 
         None
     }//}}}
-}//}}}
+}
 
-impl<T:Display + Default + Ord> Display for Tree<T>
-{//{{{
+impl<T:Display + Default + Ord> Display for Tree<T> {
     fn fmt(&self,f:&mut Formatter) -> std::fmt::Result
     {//{{{
         write!(f,"[")?;
@@ -1020,45 +1009,42 @@ impl<T:Display + Default + Ord> Display for Tree<T>
 
         write!(f,"]")
     }//}}}
-}//}}}
+}
 
-impl<T:Debug + Default + Ord> Debug for Tree<T>
-{//{{{
+impl<T:Debug + Default + Ord> Debug for Tree<T> {
     fn fmt(&self,f:&mut Formatter) -> std::fmt::Result
     {//{{{
         write!(f,"[")?;
 
         let mut first = true;
-        for value in self.ord_iter() {
-            write!(f,"{:?}{:?}",if first { first = false; ""} else { "," },*value)?;
+        for value in self.iter() {
+            write!(f,"{}{:?}",if first { first = false; ""} else { ", " },*value)?;
         }
 
         write!(f,"]")
     }//}}}
-}//}}}
+}
 
-impl<T> std::ops::Index<u32> for Tree<T>
-{//{{{
+impl<T> std::ops::Index<u32> for Tree<T> {
     type Output = T;
-
-    fn index(&self,idx: u32) -> &T {
+    fn index(&self,idx: u32) -> &T
+    {{{{
         &self.data[idx as usize].value
-    }
-}//}}}
+    }}}}
+}
 
-impl<T> std::ops::IndexMut<u32> for Tree<T>
-{//{{{
-    fn index_mut(&mut self,idx: u32) -> &mut Self::Output {
+impl<T> std::ops::IndexMut<u32> for Tree<T> {
+    fn index_mut(&mut self,idx: u32) -> &mut Self::Output
+    {{{{
         &mut self.data[idx as usize].value
-    }
-}//}}}
+    }}}}
+}
 
 #[cfg(test)]
 mod tests {
 use super::*;
 
-impl<T:Default + Ord> Tree<T>
-{//{{{
+impl<T:Default + Ord> Tree<T> {
     fn check_properties(&self) -> Result<(),&str>
     {//{{{
         let leaf = &self.data[self.leaf_idx as usize];
@@ -1150,7 +1136,7 @@ impl<T:Default + Ord> Tree<T>
 
         Ok(())
     }//}}}
-}//}}}
+}
 
 #[test]
 fn get_stack_t0()
@@ -1369,6 +1355,16 @@ fn ord_t0()
 }//}}}
 
 #[test]
+fn vec_tree_t0()
+{//{{{
+    let mut tree = Tree::<Vec<u32>>::new();
+    for count in 1 ..=10 {
+        let vec = (0u32 .. count).collect();
+        tree.insert(vec);
+    }
+}//}}}
+
+#[test]
 fn index_t0()
 {//{{{
     let values = [0,1,2,3,4,5,6,7,8,9];
@@ -1388,34 +1384,31 @@ fn index_mut_t0()
         key:u32,
         value:u32,
     }
-    impl PartialEq for U32Map
-    {//{{{
-        fn eq(&self,other:&Self) -> bool {
+    impl PartialEq for U32Map {
+        fn eq(&self,other:&Self) -> bool
+        {//{{{
             self.key == other.key
-        }
-    }//}}}
+        }//}}}
+    }
     impl Eq for U32Map {}
-    impl PartialOrd for U32Map
-    {//{{{
+    impl PartialOrd for U32Map {
         fn partial_cmp(&self,other:&Self) -> Option<Ordering>
         {//{{{
             Some(Ord::cmp(&self.key,&other.key))
         }//}}}
-    }//}}}
-    impl Ord for U32Map
-    {//{{{
+    }
+    impl Ord for U32Map {
         fn cmp(&self,other:&Self) -> Ordering
         {//{{{
             Ord::cmp(&self.key,&other.key)
         }//}}}
-    }//}}}
-    impl Display for U32Map
-    {//{{{
+    }
+    impl Display for U32Map {
         fn fmt(&self,f:&mut Formatter) -> std::fmt::Result
         {//{{{
             write!(f,"{{{},{}}}",self.key,self.value)
         }//}}}
-    }//}}}
+    }
 
     let mut tree = Tree::<U32Map>::new();
     for key in 0..8 {
@@ -1424,7 +1417,7 @@ fn index_mut_t0()
     assert_eq!(format!("{}",tree),"[{0,0},{1,0},{2,0},{3,0},{4,0},{5,0},{6,0},{7,0}]");
 
     for key in 0..8 {
-        let idx = tree.get_idx(&U32Map{key:key,value:0});
+        let idx = tree.get_idx(&U32Map{key:key,..Default::default()});
         tree[idx].value = key;
     }
     assert_eq!(format!("{}",tree),"[{0,0},{1,1},{2,2},{3,3},{4,4},{5,5},{6,6},{7,7}]");

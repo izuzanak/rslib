@@ -5,30 +5,26 @@ use std::fmt::{Debug,Display,Formatter};
 
 const IDX_NOT_EXIST:u32 = std::u32::MAX;
 
-struct ListElement<T>
-{//{{{
+struct ListElement<T> {
     next_idx:u32,
     prev_idx:u32,
     value:T,
-}//}}}
+}
 
-pub struct List<T>
-{//{{{
+pub struct List<T> {
     free_idx:u32,
     first_idx:u32,
     last_idx:u32,
     count:u32,
     data:Vec<ListElement<T>>,
-}//}}}
+}
 
-pub struct ListIter<'a,T>
-{//{{{
+pub struct ListIter<'a,T> {
     list:&'a List<T>,
     idx:u32,
-}//}}}
+}
 
-impl<T> List<T>
-{//{{{
+impl<T> List<T> {
     pub fn new() -> List<T>
     {//{{{
         List{
@@ -259,10 +255,9 @@ impl<T> List<T>
             idx:self.first_idx,
         }
     }//}}}
-}//}}}
+}
 
-impl<T:PartialEq> List<T>
-{//{{{
+impl<T:PartialEq> List<T> {
     pub fn get_idx(&self,value:&T) -> u32
     {//{{{
         let mut idx = self.first_idx;
@@ -277,10 +272,9 @@ impl<T:PartialEq> List<T>
 
         IDX_NOT_EXIST
     }//}}}
-}//}}}
+}
 
-impl<T:PartialEq> PartialEq for List<T>
-{//{{{
+impl<T:PartialEq> PartialEq for List<T> {
     fn eq(&self,other:&Self) -> bool
     {//{{{
         if self.len() != other.len() {
@@ -306,20 +300,18 @@ impl<T:PartialEq> PartialEq for List<T>
 
         true
     }//}}}
-}//}}}
+}
 
 impl<T:Eq> Eq for List<T> {}
 
-impl<T:Ord> PartialOrd for List<T>
-{//{{{
+impl<T:Ord> PartialOrd for List<T> {
     fn partial_cmp(&self,other:&Self) -> Option<Ordering>
     {//{{{
         Some(Ord::cmp(self,other))
     }//}}}
-}//}}}
+}
 
-impl<T:Ord> Ord for List<T>
-{//{{{
+impl<T:Ord> Ord for List<T> {
     fn cmp(&self,other:&Self) -> Ordering
     {//{{{
         let mut idx = self.first_idx;
@@ -345,10 +337,9 @@ impl<T:Ord> Ord for List<T>
             _ => panic!(),
         }
     }//}}}
-}//}}}
+}
 
-impl<'a,T> Iterator for ListIter<'a,T>
-{//{{{
+impl<'a,T> Iterator for ListIter<'a,T> {
     type Item = &'a T;
     fn next(&mut self) -> Option<Self::Item>
     {//{{{
@@ -361,10 +352,9 @@ impl<'a,T> Iterator for ListIter<'a,T>
             }
         }
     }//}}}
-}//}}}
+}
 
-impl<T:Display> Display for List<T>
-{//{{{
+impl<T:Display> Display for List<T> {
     fn fmt(&self,f:&mut Formatter) -> std::fmt::Result
     {//{{{
         write!(f,"[")?;
@@ -376,38 +366,36 @@ impl<T:Display> Display for List<T>
 
         write!(f,"]")
     }//}}}
-}//}}}
+}
 
-impl<T:Debug> Debug for List<T>
-{//{{{
+impl<T:Debug> Debug for List<T> {
     fn fmt(&self,f:&mut Formatter) -> std::fmt::Result
     {//{{{
         write!(f,"[")?;
 
         let mut first = true;
         for value in self.iter() {
-            write!(f,"{:?}{:?}",if first { first = false; ""} else { "," },*value)?;
+            write!(f,"{}{:?}",if first { first = false; ""} else { ", " },*value)?;
         }
 
         write!(f,"]")
     }//}}}
-}//}}}
+}
 
-impl<T> std::ops::Index<u32> for List<T>
-{//{{{
+impl<T> std::ops::Index<u32> for List<T> {
     type Output = T;
-
-    fn index(&self,idx: u32) -> &T {
+    fn index(&self,idx: u32) -> &T
+    {//{{{
         &self.data[idx as usize].value
-    }
-}//}}}
+    }//}}}
+}
 
-impl<T> std::ops::IndexMut<u32> for List<T>
-{//{{{
-    fn index_mut(&mut self,idx: u32) -> &mut Self::Output {
+impl<T> std::ops::IndexMut<u32> for List<T> {
+    fn index_mut(&mut self,idx: u32) -> &mut Self::Output
+    {//{{{
         &mut self.data[idx as usize].value
-    }
-}//}}}
+    }//}}}
+}
 
 #[cfg(test)]
 mod tests {
@@ -577,6 +565,16 @@ fn ord_t0()
         vec.push(Ord::cmp(&list,&list1) as i8);
     }
     assert_eq!(vec,vec![1,1,1,1,0,-1,-1,-1,-1]);
+}//}}}
+
+#[test]
+fn vec_list_t0()
+{//{{{
+    let mut list = List::<Vec<u32>>::new();
+    for count in 1 ..=10 {
+        let vec = (0u32 .. count).collect();
+        list.append(vec);
+    }
 }//}}}
 
 #[test]

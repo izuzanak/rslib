@@ -1,10 +1,9 @@
 [package]
-name = "json"
+name = "vars"
 version = "0.1.0"
 authors = ["Jiří Zuzaňák <zuzanakjiri@gmail.com>"]
+edition = "2018"
 
 [dependencies]
 err = { path = "../err" }
 tree = { path = "../tree" }
-vars = { path = "../vars" }
-

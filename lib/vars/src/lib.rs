@@ -1,11 +1,12 @@
 #[macro_use] extern crate err;
 
+use std::sync::{Arc};
 use std::fmt::{Debug,Display,Formatter};
 
 const ERROR_INVALID_VALUE_TYPE:&str = "Invalid value type";
 
-#[derive(Debug,PartialEq,PartialOrd,Clone)]
-pub enum Var {
+#[derive(Debug,PartialEq,PartialOrd)]
+pub enum Data {
     Blank,
     Bool   (bool),
     Int    (i64),
@@ -15,30 +16,30 @@ pub enum Var {
     Dict   (tree::Tree<VarMap>),
 }
 
-impl Default for Var {
+impl Default for Data {
    fn default() -> Self {
-       Var::Blank
+       Data::Blank
    }
 }
 
-impl Eq for Var {}
+impl Eq for Data {}
 
-impl Ord for Var {
+impl Ord for Data {
     fn cmp(&self,other:&Self) -> std::cmp::Ordering {
         self.partial_cmp(other).unwrap()
     }
 }
 
-impl Display for Var {
+impl Display for Data {
     fn fmt(&self,f:&mut Formatter) -> std::fmt::Result
     {//{{{
         match *self {
-            Var::Blank => write!(f,"<blank>"),
-            Var::Bool(value) => write!(f,"{}",value),
-            Var::Int(value) => write!(f,"{}",value),
-            Var::Float(value) => write!(f,"{}",value),
-            Var::String(ref value) => write!(f,"{}",value),
-            Var::Array(ref value) => {
+            Data::Blank => write!(f,"<blank>"),
+            Data::Bool(value) => write!(f,"{}",value),
+            Data::Int(value) => write!(f,"{}",value),
+            Data::Float(value) => write!(f,"{}",value),
+            Data::String(ref value) => write!(f,"{}",value),
+            Data::Array(ref value) => {
                 write!(f,"[")?;
                 let mut first = true;
                 for item in value {
@@ -46,7 +47,7 @@ impl Display for Var {
                 }
                 write!(f,"]")
             },
-            Var::Dict(ref value) => {
+            Data::Dict(ref value) => {
                 write!(f,"[")?;
                 let mut first = true;
                 for item in value.iter() {
@@ -58,76 +59,96 @@ impl Display for Var {
     }//}}}
 }
 
+#[derive(Clone,Default,PartialEq,Eq,PartialOrd,Ord)]
+pub struct Var {
+    data:Arc<Data>
+}
+
 impl Var {
     pub fn blank() -> Var {
-        Var::Blank
+        Var::default()
     }
     pub fn bool(val:bool) -> Var {
-        Var::Bool(val)
+        Var{data:Arc::new(Data::Bool(val))}
     }
     pub fn int(val:i64) -> Var {
-        Var::Int(val)
+        Var{data:Arc::new(Data::Int(val))}
     }
     pub fn float(val:f64) -> Var {
-        Var::Float(val)
+        Var{data:Arc::new(Data::Float(val))}
     }
     pub fn str(val:&str) -> Var {
-        Var::String(String::from(val))
+        Var{data:Arc::new(Data::String(String::from(val)))}
     }
     pub fn array(val:Vec<Var>) -> Var {
-        Var::Array(val)
+        Var{data:Arc::new(Data::Array(val))}
     }
     pub fn dict(val:tree::Tree<VarMap>) -> Var {
-        Var::Dict(val)
+        Var{data:Arc::new(Data::Dict(val))}
     }
     pub fn var(val:&Var) -> Var {
-        (*val).clone()
+        Var{data:Arc::clone(&val.data)}
+    }
+    pub fn data(&self) -> &Data {
+        &self.data
     }
     pub fn to_bool(&self) -> Result<bool,err::Error>
     {//{{{
-        match *self {
-            Var::Bool(value) => Ok(value),
+        match *self.data {
+            Data::Bool(value) => Ok(value),
             _ => err!(ERROR_INVALID_VALUE_TYPE)
         }
     }//}}}
     pub fn to_int(&self) -> Result<i64,err::Error>
     {//{{{
-        match *self {
-            Var::Int(value) => Ok(value),
+        match *self.data {
+            Data::Int(value) => Ok(value),
             _ => err!(ERROR_INVALID_VALUE_TYPE)
         }
     }//}}}
     pub fn to_float(&self) -> Result<f64,err::Error>
     {//{{{
-        match *self {
-            Var::Float(value) => Ok(value),
+        match *self.data {
+            Data::Float(value) => Ok(value),
             _ => err!(ERROR_INVALID_VALUE_TYPE)
         }
     }//}}}
     pub fn to_str(&self) -> Result<&String,err::Error>
     {//{{{
-        match *self {
-            Var::String(ref value) => Ok(value),
+        match *self.data {
+            Data::String(ref value) => Ok(value),
             _ => err!(ERROR_INVALID_VALUE_TYPE)
         }
     }//}}}
     pub fn to_array(&mut self) -> Result<&mut Vec<Var>,err::Error>
     {//{{{
-        match *self {
-            Var::Array(ref mut value) => Ok(value),
+        match Arc::get_mut(&mut self.data) {
+            Some(Data::Array(ref mut value)) => Ok(value),
             _ => err!(ERROR_INVALID_VALUE_TYPE)
         }
     }//}}}
     pub fn to_dict(&mut self) -> Result<&mut tree::Tree<VarMap>,err::Error>
     {//{{{
-        match *self {
-            Var::Dict(ref mut value) => Ok(value),
+        match Arc::get_mut(&mut self.data) {
+            Some(Data::Dict(ref mut value)) => Ok(value),
             _ => err!(ERROR_INVALID_VALUE_TYPE)
         }
     }//}}}
 }
 
-#[derive(Default,PartialEq,Eq,PartialOrd,Clone)]
+impl Display for Var {
+    fn fmt(&self,f:&mut Formatter) -> std::fmt::Result {
+        write!(f,"{}",self.data)
+    }
+}
+
+impl Debug for Var {
+    fn fmt(&self,f:&mut Formatter) -> std::fmt::Result {
+        write!(f,"{:?}#{}",self.data,Arc::strong_count(&self.data))
+    }
+}
+
+#[derive(Default,PartialEq,Eq,PartialOrd)]
 pub struct VarMap {
     pub key:Var,
     pub value:Var,
@@ -309,14 +330,14 @@ use super::*;
 #[test]
 fn blank_t0()
 {//{{{
-    match Var::blank() { Var::Blank => {} _ => panic!(err::TEST_FAILED) }
+    match Var::blank().data() { &Data::Blank => {} _ => panic!(err::TEST_FAILED) }
 }//}}}
 
 #[test]
 fn bool_t0()
 {//{{{
-    match Var::bool(true) { Var::Bool(true) => {} _ => panic!(err::TEST_FAILED) }
-    match Var::bool(false) { Var::Bool(false) => {} _ => panic!(err::TEST_FAILED) }
+    match Var::bool(true).data() { &Data::Bool(true) => {} _ => panic!(err::TEST_FAILED) }
+    match Var::bool(false).data() { &Data::Bool(false) => {} _ => panic!(err::TEST_FAILED) }
 
     assert_eq!(Var::bool(false).to_bool(),Ok(false));
     assert_eq!(Var::bool(true).to_bool(),Ok(true));
@@ -326,9 +347,9 @@ fn bool_t0()
 #[test]
 fn int_t0()
 {//{{{
-    match Var::int(10) { Var::Int(10) => {} _ => panic!(err::TEST_FAILED) }
-    match Var::int(123) { Var::Int(123) => {} _ => panic!(err::TEST_FAILED) }
-    match Var::int(-156) { Var::Int(-156) => {} _ => panic!(err::TEST_FAILED) }
+    match Var::int(10).data() { &Data::Int(10) => {} _ => panic!(err::TEST_FAILED) }
+    match Var::int(123).data() { &Data::Int(123) => {} _ => panic!(err::TEST_FAILED) }
+    match Var::int(-156).data() { &Data::Int(-156) => {} _ => panic!(err::TEST_FAILED) }
 
     assert_eq!(Var::int(10).to_int(),Ok(10));
     assert_eq!(Var::int(123).to_int(),Ok(123));
@@ -338,18 +359,18 @@ fn int_t0()
 #[test]
 fn float_t0()
 {//{{{
-    match Var::float(1.236) {
-        Var::Float(value) => { assert_eq!(value,1.236); }
+    match Var::float(1.236).data() {
+        &Data::Float(value) => { assert_eq!(value,1.236); }
         _ => panic!(err::TEST_FAILED)
     }
 
-    match Var::float(1256.2) {
-        Var::Float(value) => { assert_eq!(value,1256.2); }
+    match Var::float(1256.2).data() {
+        &Data::Float(value) => { assert_eq!(value,1256.2); }
         _ => panic!(err::TEST_FAILED)
     }
 
-    match Var::float(-325.2) {
-        Var::Float(value) => { assert_eq!(value,-325.2); }
+    match Var::float(-325.2).data() {
+        &Data::Float(value) => { assert_eq!(value,-325.2); }
         _ => panic!(err::TEST_FAILED)
     }
 
@@ -361,8 +382,8 @@ fn float_t0()
 #[test]
 fn string_t0()
 {//{{{
-    match Var::str("Hello world") {
-        Var::String(ref value) => { assert_eq!(value,"Hello world"); }
+    match Var::str("Hello world").data() {
+        &Data::String(ref value) => { assert_eq!(value,"Hello world"); }
         _ => panic!(err::TEST_FAILED)
     }
 
@@ -382,8 +403,8 @@ fn array_t0()
         Var::str("Hello world"),
     ]);
 
-    match array {
-        Var::Array(_) => {}
+    match array.data() {
+        &Data::Array(_) => {}
         _ => panic!(err::TEST_FAILED)
     };
 }//}}}
@@ -414,6 +435,15 @@ fn dict_t0()
     map.insert(VarMap{key:Var::str("Four"),value:Var::int(4)});
 
     assert_eq!(format!("{}",dict),"[One:1,Two:2,Three:3,Four:4]");
+}//}}}
+
+#[test]
+fn data_t0()
+{//{{{
+    assert!(Data::Blank < Data::Bool(true));
+    assert!(Data::Bool(false) < Data::Int(123));
+    assert!(Data::Int(123) < Data::Float(12.345));
+    assert!(Data::Float(12.345) < Data::String(String::from("Hello world")));
 }//}}}
 
 #[test]
@@ -486,22 +516,22 @@ fn var_display_fmt_t0()
 #[test]
 fn var_debug_fmt_t0()
 {//{{{
-    assert_eq!(format!("{:?}",Var::blank()),"Blank");
-    assert_eq!(format!("{:?}",Var::bool(true)),"Bool(true)");
-    assert_eq!(format!("{:?}",Var::bool(false)),"Bool(false)");
-    assert_eq!(format!("{:?}",Var::int(10)),"Int(10)");
-    assert_eq!(format!("{:?}",Var::int(123)),"Int(123)");
-    assert_eq!(format!("{:?}",Var::int(-156)),"Int(-156)");
-    assert_eq!(format!("{:?}",Var::float(10.123)),"Float(10.123)");
-    assert_eq!(format!("{:?}",Var::float(123.123)),"Float(123.123)");
-    assert_eq!(format!("{:?}",Var::float(-156.123)),"Float(-156.123)");
-    assert_eq!(format!("{:?}",Var::str("Hello world")),"String(\"Hello world\")");
+    assert_eq!(format!("{:?}",Var::blank()),"Blank#1");
+    assert_eq!(format!("{:?}",Var::bool(true)),"Bool(true)#1");
+    assert_eq!(format!("{:?}",Var::bool(false)),"Bool(false)#1");
+    assert_eq!(format!("{:?}",Var::int(10)),"Int(10)#1");
+    assert_eq!(format!("{:?}",Var::int(123)),"Int(123)#1");
+    assert_eq!(format!("{:?}",Var::int(-156)),"Int(-156)#1");
+    assert_eq!(format!("{:?}",Var::float(10.123)),"Float(10.123)#1");
+    assert_eq!(format!("{:?}",Var::float(123.123)),"Float(123.123)#1");
+    assert_eq!(format!("{:?}",Var::float(-156.123)),"Float(-156.123)#1");
+    assert_eq!(format!("{:?}",Var::str("Hello world")),"String(\"Hello world\")#1");
     assert_eq!(format!("{:?}",Var::array(vec![
         Var::blank(),
         Var::bool(true),
         Var::bool(false),
         Var::array(vec![Var::bool(true),Var::bool(false)]),
-    ])),"Array([Blank, Bool(true), Bool(false), Array([Bool(true), Bool(false)])])");
+    ])),"Array([Blank#1, Bool(true)#1, Bool(false)#1, Array([Bool(true)#1, Bool(false)#1])#1])#1");
 
     let var = Var::bool(true);
     assert_eq!(format!("{:?}",Var::array(vec![
@@ -510,7 +540,7 @@ fn var_debug_fmt_t0()
         Var::var(&var),
         Var::var(&var),
         Var::var(&var),
-    ])),"Array([Bool(true), Bool(true), Bool(true), Bool(true), Bool(true)])");
+    ])),"Array([Bool(true)#6, Bool(true)#6, Bool(true)#6, Bool(true)#6, Bool(true)#6])#1");
 
     let var1 = var!({
         s("one"):i(1),
@@ -518,7 +548,7 @@ fn var_debug_fmt_t0()
         s("three"):i(3),
     });
     assert_eq!(format!("{:?}",var1),
-        "Dict([String(\"one\"):Int(1), String(\"two\"):Int(2), String(\"three\"):Int(3)])");
+        "Dict([String(\"one\")#1:Int(1)#1, String(\"two\")#1:Int(2)#1, String(\"three\")#1:Int(3)#1])#1");
 }//}}}
 
 #[test]
