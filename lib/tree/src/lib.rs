@@ -447,10 +447,9 @@ impl<T:Default + Ord> Tree<T> {
         tree
     }//}}}
 
-    pub fn len(&self) -> u32
-    {//{{{
+    pub fn len(&self) -> u32 {
         self.count
-    }//}}}
+    }
 
     pub fn get_stack_min_value_idx(&self,idx:u32,stack:&mut Vec<u32>) -> u32
     {//{{{
