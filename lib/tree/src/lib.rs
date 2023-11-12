@@ -1027,16 +1027,16 @@ impl<T:Debug + Default + Ord> Debug for Tree<T> {
 impl<T> std::ops::Index<u32> for Tree<T> {
     type Output = T;
     fn index(&self,idx: u32) -> &T
-    {{{{
+    {//{{{
         &self.data[idx as usize].value
-    }}}}
+    }//}}}
 }
 
 impl<T> std::ops::IndexMut<u32> for Tree<T> {
     fn index_mut(&mut self,idx: u32) -> &mut Self::Output
-    {{{{
+    {//{{{
         &mut self.data[idx as usize].value
-    }}}}
+    }//}}}
 }
 
 #[cfg(test)]
