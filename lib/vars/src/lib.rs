@@ -80,6 +80,9 @@ impl Var {
     pub fn str(val:&str) -> Var {
         Var{data:Arc::new(Data::String(String::from(val)))}
     }
+    pub fn string(val:String) -> Var {
+        Var{data:Arc::new(Data::String(val))}
+    }
     pub fn array(val:Vec<Var>) -> Var {
         Var{data:Arc::new(Data::Array(val))}
     }

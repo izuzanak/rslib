@@ -1059,7 +1059,7 @@ impl<'a> Parser<'a> {
                 }
 
                 unsafe {
-                    var!(s(std::str::from_utf8_unchecked(&const_str)))
+                    Var::string(String::from_utf8_unchecked(const_str))
                 }
             };
 
