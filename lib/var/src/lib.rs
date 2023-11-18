@@ -74,6 +74,9 @@ impl Var {
     pub fn str(val:&str) -> Var {
         Var::String(String::from(val))
     }
+    pub fn string(val:String) -> Var {
+        Var::String(val)
+    }
     pub fn array(val:Vec<Var>) -> Var {
         Var::Array(val)
     }

@@ -1,12 +1,10 @@
 //#![allow(dead_code)]
 
-use std::cmp::{PartialOrd,Ord,Ordering};
+use std::collections::HashMap;
 
 #[macro_use] extern crate err;
-#[macro_use] extern crate tree;
 #[macro_use] extern crate vars;
 
-use tree::Tree;
 use vars::Var;
 use vars::Data;
 use std::fmt::Write;
@@ -20,8 +18,8 @@ const JSON_PARSE_ERROR:&str = "json parse error";
 const IDX_NOT_EXIST:u32 = std::u32::MAX;
 
 const RULE_CNT:usize = 24;
-const RULE_HEAD_IDXS:[u32;RULE_CNT] = [17, 18, 19, 20, 20, 21, 22, 22, 23, 24, 25, 25, 26, 27, 27, 28, 28, 28, 28, 28, 28, 28, 28, 29, ];
-const RULE_BODY_LENGTHS:[usize;RULE_CNT] = [1, 2, 2, 1, 2, 1, 3, 1, 3, 2, 1, 2, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ];
+static RULE_HEAD_IDXS:[u32;RULE_CNT] = [17, 18, 19, 20, 20, 21, 22, 22, 23, 24, 25, 25, 26, 27, 27, 28, 28, 28, 28, 28, 28, 28, 28, 29, ];
+static RULE_BODY_LENGTHS:[usize;RULE_CNT] = [1, 2, 2, 1, 2, 1, 3, 1, 3, 2, 1, 2, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ];
 
 // - lalr parse table -
 const BLANK:u32 = IDX_NOT_EXIST;
@@ -33,7 +31,7 @@ const LALR_TABLE_REDUCE_BASE:u32 = 0x80000000;
 const TERMINAL_PLUS_NONTERMINAL_CNT:u32 = 30;
 const LALR_STATE_CNT:usize = 32;
 
-const LALR_TABLE:[u32;LALR_STATE_CNT*(TERMINAL_PLUS_NONTERMINAL_CNT as usize)] =
+static LALR_TABLE:[u32;LALR_STATE_CNT*(TERMINAL_PLUS_NONTERMINAL_CNT as usize)] =
 [/*{{{*/
    shift!(11),    shift!(4),    shift!(5),    shift!(8),    shift!(9),   shift!(10),   shift!(16),        BLANK,   shift!(17),        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,     goto!(1),     goto!(6),    goto!(12),    goto!(14),        BLANK,        BLANK,     goto!(7),    goto!(13),    goto!(15),        BLANK,     goto!(2),     goto!(3),
         BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,        BLANK,
@@ -651,75 +649,6 @@ impl<'a> TermSource<'a> {
 
 }
 
-#[derive(Default)]
-struct I64VarMap {
-    key:i64,
-    value:Var,
-}
-
-impl PartialEq for I64VarMap {
-    fn eq(&self,other:&Self) -> bool {
-        self.key == other.key
-    }
-}
-impl Eq for I64VarMap {}
-impl PartialOrd for I64VarMap {
-    fn partial_cmp(&self,other:&Self) -> Option<Ordering> {
-        Some(Ord::cmp(&self.key,&other.key))
-    }
-}
-impl Ord for I64VarMap {
-    fn cmp(&self,other:&Self) -> Ordering {
-        Ord::cmp(&self.key,&other.key)
-    }
-}
-
-#[derive(Default)]
-struct F64VarMap {
-    key:f64,
-    value:Var,
-}
-
-impl PartialEq for F64VarMap {
-    fn eq(&self,other:&Self) -> bool {
-        self.key == other.key
-    }
-}
-impl Eq for F64VarMap {}
-impl PartialOrd for F64VarMap {
-    fn partial_cmp(&self,other:&Self) -> Option<Ordering> {
-        PartialOrd::partial_cmp(&self.key,&other.key)
-    }
-}
-impl Ord for F64VarMap {
-    fn cmp(&self,other:&Self) -> Ordering {
-        PartialOrd::partial_cmp(&self.key,&other.key).unwrap()
-    }
-}
-
-#[derive(Default)]
-struct StringVarMap<'a> {
-    key:&'a str,
-    value:Var,
-}
-
-impl PartialEq for StringVarMap<'_> {
-    fn eq(&self,other:&Self) -> bool {
-        self.key == other.key
-    }
-}
-impl Eq for StringVarMap<'_> {}
-impl PartialOrd for StringVarMap<'_> {
-    fn partial_cmp(&self,other:&Self) -> Option<Ordering> {
-        Some(Ord::cmp(&self.key,&other.key))
-    }
-}
-impl Ord for StringVarMap<'_> {
-    fn cmp(&self,other:&Self) -> Ordering {
-        Ord::cmp(&self.key,&other.key)
-    }
-}
-
 struct Parser<'a> {
     source:&'a[u8],
     lalr_stack:Vec<LalrStackElement>,
@@ -728,9 +657,8 @@ struct Parser<'a> {
     var_true:Var,
     var_false:Var,
 
-    integer_map:Tree<I64VarMap>,
-    double_map:Tree<F64VarMap>,
-    string_map:Tree<StringVarMap<'a>>,
+    integer_map:HashMap<i64,Var>,
+    string_map:HashMap<&'a str,Var>,
 
     strings:Vec<Var>,
     values:Vec<Var>,
@@ -748,9 +676,8 @@ impl<'a> Parser<'a> {
             var_true:var!(true),
             var_false:var!(false),
 
-            integer_map:Tree::new(),
-            double_map:Tree::new(),
-            string_map:Tree::new(),
+            integer_map:HashMap::new(),
+            string_map:HashMap::new(),
 
             strings:vec![],
             values:vec![],
@@ -899,15 +826,8 @@ impl<'a> Parser<'a> {
                 &self.source[lse.terminal_start .. lse.terminal_end]).parse::<i64>().unwrap();
         }
 
-        let index = self.integer_map.get_idx(&I64VarMap{key:const_int,value:self.var_null.clone()});
-        if index != IDX_NOT_EXIST {
-            self.values.push(self.integer_map[index].value.clone());
-        }
-        else {
-            let value = var!(i(const_int));
-            self.integer_map.insert(I64VarMap{key:const_int,value:value.clone()});
-            self.values.push(value);
-        }
+        let value = self.integer_map.entry(const_int).or_insert(var!(i(const_int)));
+        self.values.push(value.clone());
 
         true
     }//}}}
@@ -922,15 +842,7 @@ impl<'a> Parser<'a> {
                 &self.source[lse.terminal_start .. lse.terminal_end]).parse::<f64>().unwrap();
         }
 
-        let index = self.double_map.get_idx(&F64VarMap{key:const_float,value:self.var_null.clone()});
-        if index != IDX_NOT_EXIST {
-            self.values.push(self.double_map[index].value.clone());
-        }
-        else {
-            let value = var!(f(const_float));
-            self.double_map.insert(F64VarMap{key:const_float,value:value.clone()});
-            self.values.push(value);
-        }
+        self.values.push(var!(f(const_float)));
 
         true
     }//}}}
@@ -977,95 +889,88 @@ impl<'a> Parser<'a> {
             slice_str = std::str::from_utf8_unchecked(&self.source[idx .. idx_end]);
         }
 
-        let index = self.string_map.get_idx(&StringVarMap{key:slice_str,value:self.var_null.clone()});
-        if index != IDX_NOT_EXIST {
-            self.strings.push(self.string_map[index].value.clone());
-        }
-        else {
-            let value = {
-                let mut const_str:Vec<u8> = vec![];
-                const_str.reserve((idx_end - idx) + 1);
+        let value = self.string_map.entry(slice_str).or_insert({
+            let mut const_str:Vec<u8> = vec![];
+            const_str.reserve((idx_end - idx) + 1);
 
-                while idx < idx_end {
-                    if self.source[idx] == '\\' as u8 {
+            while idx < idx_end {
+                if self.source[idx] == '\\' as u8 {
+                    idx += 1;
+
+                    // - process character represented by unicode number -
+                    if self.source[idx] == 'u' as u8 {
                         idx += 1;
 
-                        // - process character represented by unicode number -
-                        if self.source[idx] == 'u' as u8 {
+                        let mut value:u32 = 0;
+
+                        // - retrieve character value -
+                        let idx_end = idx + 4;
+                        loop {
+                            value <<= 4;
+
+                            if self.source[idx] >= '0' as u8 && self.source[idx] <= '9' as u8 {
+                                value += (self.source[idx] - '0' as u8) as u32;
+                            }
+                            else if self.source[idx] >= 'a' as u8 && self.source[idx] <= 'f' as u8 {
+                                value += (10 + (self.source[idx] - 'a' as u8)) as u32;
+                            }
+                            else if self.source[idx] >= 'A' as u8 && self.source[idx] <= 'F' as u8 {
+                                value += (10 + (self.source[idx] - 'A' as u8)) as u32;
+                            }
+                            else
+                            {
+                                unreachable!();
+                            }
+
                             idx += 1;
-
-                            let mut value:u32 = 0;
-
-                            // - retrieve character value -
-                            let idx_end = idx + 4;
-                            loop {
-                                value <<= 4;
-
-                                if self.source[idx] >= '0' as u8 && self.source[idx] <= '9' as u8 {
-                                    value += (self.source[idx] - '0' as u8) as u32;
-                                }
-                                else if self.source[idx] >= 'a' as u8 && self.source[idx] <= 'f' as u8 {
-                                    value += (10 + (self.source[idx] - 'a' as u8)) as u32;
-                                }
-                                else if self.source[idx] >= 'A' as u8 && self.source[idx] <= 'F' as u8 {
-                                    value += (10 + (self.source[idx] - 'A' as u8)) as u32;
-                                }
-                                else
-                                {
-                                    unreachable!();
-                                }
-
-                                idx += 1;
-                                if idx >= idx_end {
-                                    break;
-                                }
-                            }
-
-                            // - convert utf16/32 value to utf8 character string -
-                            if value <= 0x7f {
-                                const_str.push(value as u8);
-                            }
-                            else if value <= 0x7ff {
-                                const_str.push((0xc0 | value >> 6) as u8);
-                                const_str.push((0x80 | (value & 0x3f)) as u8);
-                            }
-                            else if value <= 0xffff {
-                                const_str.push((0xe0 |   value >> 12) as u8);
-                                const_str.push((0x80 | ((value >>  6)  & 0x3f)) as u8);
-                                const_str.push((0x80 |  (value         & 0x3f)) as u8);
+                            if idx >= idx_end {
+                                break;
                             }
                         }
-                        else
-                        {
-                            const_str.push(match self.source[idx] {
-                                 34 =>    '"' as u8,
-                                 92 =>   '\\' as u8,
-                                 98 => '\x08' as u8,
-                                102 => '\x0c' as u8,
-                                110 =>   '\n' as u8,
-                                114 =>   '\r' as u8,
-                                116 =>   '\t' as u8,
-                                  _ => unreachable!(),
-                            });
 
-                            idx += 1;
+                        // - convert utf16/32 value to utf8 character string -
+                        if value <= 0x7f {
+                            const_str.push(value as u8);
+                        }
+                        else if value <= 0x7ff {
+                            const_str.push((0xc0 | value >> 6) as u8);
+                            const_str.push((0x80 | (value & 0x3f)) as u8);
+                        }
+                        else if value <= 0xffff {
+                            const_str.push((0xe0 |   value >> 12) as u8);
+                            const_str.push((0x80 | ((value >>  6)  & 0x3f)) as u8);
+                            const_str.push((0x80 |  (value         & 0x3f)) as u8);
                         }
                     }
                     else
                     {
-                        const_str.push(self.source[idx]);
+                        const_str.push(match self.source[idx] {
+                             34 =>    '"' as u8,
+                             92 =>   '\\' as u8,
+                             98 => '\x08' as u8,
+                            102 => '\x0c' as u8,
+                            110 =>   '\n' as u8,
+                            114 =>   '\r' as u8,
+                            116 =>   '\t' as u8,
+                                  _ => unreachable!(),
+                        });
+
                         idx += 1;
                     }
                 }
-
-                unsafe {
-                    Var::string(String::from_utf8_unchecked(const_str))
+                else
+                {
+                    const_str.push(self.source[idx]);
+                    idx += 1;
                 }
-            };
+            }
 
-            self.string_map.insert(StringVarMap{key:slice_str,value:value.clone()});
-            self.strings.push(value);
-        }
+            unsafe {
+                Var::string(String::from_utf8_unchecked(const_str))
+            }
+        });
+
+        self.strings.push(value.clone());
 
         true
     }//}}}
